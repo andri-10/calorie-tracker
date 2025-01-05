@@ -1,0 +1,18 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+/target/
+
+# React
+node_modules/
+build/
+
+# IDEs
+.idea/
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
