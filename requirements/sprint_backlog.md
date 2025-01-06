@@ -1,4 +1,4 @@
-# Sprint Backlog - Week 1 (Weeks 1-3)
+# Sprint Backlog
 
 ## Sprint Goal:
 Deliver core functionality for account management, food entry management, calorie threshold management, and basic expenditure tracking.
