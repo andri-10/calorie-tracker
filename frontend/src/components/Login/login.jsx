@@ -9,29 +9,44 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [sms, setSms] = useState('');
   const [smsColor, setSmsColor] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // State to control password visibility
+  const [showPassword, setShowPassword] = useState(false); 
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSms('');
 
-    // Empty fields validation
-    if (email==="" || password==="") {
+    
+    if (email === "" || password === "") {
       setSms('Please fill in all fields');
-      setSmsColor('red');
-      return; // Don't continue if email is invalid
-    }
-
-    // Checking if account exists
-    if (email !== 'test@example.com' && password !== 'password') {
-      setSms('Invalid email or password');
       setSmsColor('red');
       return;
     }
-    
-      setSms('Login successful');
-      setSmsColor('green');
-    
+
+    // Posts to Spring Backend
+    try {
+      const response = await axios.post('http://localhost:8080/api/users/login', {
+        email,
+        password,
+      });
+
+     
+      if (response.status === 200) {
+        const { token } = response.data;
+        localStorage.setItem('jwtToken', token); 
+        setSms('Login successful');
+        setSmsColor('green');
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        
+        setSms('Invalid email or password');
+        setSmsColor('red');
+      } else {
+        
+        setSms('An error occurred. Please try again.');
+        setSmsColor('red');
+      }
+    }
   };
 
   return (
@@ -53,7 +68,7 @@ const Login = () => {
         <Form.Group className="mb-3" controlId="formBasicPassword">
           <Form.Label>Password</Form.Label>
           <Form.Control
-            type={showPassword ? 'text' : 'password'} //Toggles the password based on the checkbox selection
+            type={showPassword ? 'text' : 'password'} // Toggles the password visibility based on checkbox
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -64,8 +79,8 @@ const Login = () => {
           <Form.Check
             type="checkbox"
             label="Show password"
-            checked={showPassword} 
-            onChange={(e) => setShowPassword(e.target.checked)} //Changes password toggle if we check or uncheck the box
+            checked={showPassword}
+            onChange={(e) => setShowPassword(e.target.checked)} // Toggles password visibility
           />
           <Form.Check type="checkbox" label="Keep me signed in" />
         </Form.Group>
