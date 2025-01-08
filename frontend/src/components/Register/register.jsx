@@ -4,20 +4,32 @@ import { Button, Form, Container } from 'react-bootstrap';
 import './register.css';
 
 const Register = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPass, setConfirmPass] = useState('');
-  const [name, setName] = useState(''); 
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPass: ''
+  });
   const [sms, setSms] = useState('');
   const [smsColor, setSmsColor] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSms(''); // Clear any previous messages
+    setSms('');
+
+    // Destructure form data for easier use
+    const { name, email, password, confirmPass } = formData;
 
     // Empty fields validation
-    if (email === "" || password === "" || confirmPass === "" || name === "") {
+    if (!name || !email || !password || !confirmPass) {
       setSms('Please fill in all fields');
       setSmsColor('red');
       return;
@@ -27,9 +39,12 @@ const Register = () => {
     if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
       setSms('Email is invalid');
       setSmsColor('red');
-      setEmail("");
-      setPassword("");
-      setConfirmPass("");
+      setFormData(prev => ({
+        ...prev,
+        email: '',
+        password: '',
+        confirmPass: ''
+      }));
       return;
     }
 
@@ -37,8 +52,11 @@ const Register = () => {
     if (confirmPass !== password) {
       setSms('Passwords don\'t match');
       setSmsColor('red');
-      setPassword("");
-      setConfirmPass("");
+      setFormData(prev => ({
+        ...prev,
+        password: '',
+        confirmPass: ''
+      }));
       return;
     }
 
@@ -46,39 +64,47 @@ const Register = () => {
     if (!/^(?=.*[A-Z])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/.test(password)) {
       setSms('Your password should have at least 8 letters, 1 capital letter, and 1 special character');
       setSmsColor('red');
-      setPassword("");
-      setConfirmPass("");
+      setFormData(prev => ({
+        ...prev,
+        password: '',
+        confirmPass: ''
+      }));
       return;
     }
 
     try {
-      // Sending registration data to Spring Boot backend
+      // Send registration request
       const response = await axios.post('http://localhost:8080/users/register', {
+        name,
         email,
-        password,
-        name,  
-        role: 'USER',  
+        password
+        // No need to send role as it defaults to USER in the backend
       });
 
-      // If registration is successful
       if (response.status === 200) {
-        console.log('Response Status:', response.status);
         setSms('Registration successful');
         setSmsColor('green');
-        window.location.href = "/login";
+        // Store the token if needed
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
+        }
+        // Redirect to login page after successful registration
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 1500);
       }
     } catch (error) {
-      // Handle errors
       if (error.response) {
         console.log('Error Response Status:', error.response.status);
         console.log('Error Response Data:', error.response.data);
         if (error.response.status === 400) {
-          setSms('Email already exists');
-          setSmsColor('red');
+          setSms(error.response.data.includes('Email is already in use') 
+            ? 'Email already exists' 
+            : 'Registration failed. Please try again.');
         } else {
           setSms('An error occurred. Please try again.');
-          setSmsColor('red');
         }
+        setSmsColor('red');
       } else {
         console.log('Error:', error.message);
         setSms('An error occurred. Please try again.');
@@ -95,8 +121,9 @@ const Register = () => {
           <Form.Control
             type="text"
             placeholder="Enter your name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
           />
         </Form.Group>
 
@@ -105,8 +132,9 @@ const Register = () => {
           <Form.Control
             type="email"
             placeholder="Enter email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
           />
           <Form.Text className="text-muted">
             We'll never share your email with anyone else.
@@ -116,20 +144,22 @@ const Register = () => {
         <Form.Group className="mb-3" controlId="formBasicPassword">
           <Form.Label>Password</Form.Label>
           <Form.Control
-            type={showPassword ? 'text' : 'password'} // Toggles password visibility based on checkbox
+            type={showPassword ? 'text' : 'password'}
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
           />
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="formBasicConfirmPassword">
           <Form.Label>Confirm Password</Form.Label>
           <Form.Control
-            type={showPassword ? 'text' : 'password'} // Toggles password visibility based on checkbox
+            type={showPassword ? 'text' : 'password'}
             placeholder="Confirm Password"
-            value={confirmPass}
-            onChange={(e) => setConfirmPass(e.target.value)}
+            name="confirmPass"
+            value={formData.confirmPass}
+            onChange={handleChange}
           />
         </Form.Group>
 
@@ -138,14 +168,14 @@ const Register = () => {
             type="checkbox"
             label="Show password"
             checked={showPassword}
-            onChange={(e) => setShowPassword(e.target.checked)} // Toggles password visibility
+            onChange={(e) => setShowPassword(e.target.checked)}
           />
         </Form.Group>
 
         <Button variant="primary" type="submit">
           Submit
         </Button>
-        <p style={{ color: `${smsColor}` }}>{sms}</p>
+        <p style={{ color: smsColor }}>{sms}</p>
       </Form>
     </Container>
   );
