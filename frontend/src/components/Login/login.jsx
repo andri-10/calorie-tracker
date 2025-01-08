@@ -24,7 +24,7 @@ const Login = () => {
 
     // Posts to Spring Backend
     try {
-      const response = await axios.post('http://localhost:8080/api/users/login', {
+      const response = await axios.post('http://localhost:8080/users/login', {
         email,
         password,
       });
