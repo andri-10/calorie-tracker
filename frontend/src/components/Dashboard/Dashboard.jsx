@@ -5,7 +5,7 @@ import FoodList from './FoodList';
 
 const Dashboard = () => {
   const [dailyCalories, setDailyCalories] = useState(1750);
-  const [monthlyExpenditure, setMonthlyExpenditure] = useState(850);
+  const [monthlyExpenditure, setMonthlyExpenditure] = useState(800);
   const [showTips, setShowTips] = useState(false);
 
   return (
@@ -49,7 +49,7 @@ const Dashboard = () => {
               <div className="card-body">
                 <h5 className="card-title text-primary fw-bold">Monthly Spending</h5>
                 <h2 className="display-6 fw-bold mb-0">€{monthlyExpenditure.toFixed(2)}</h2>
-                <div className="progress mt-3" style={{ height: '10px' }}>
+                <div className="progress mt-5" style={{ height: '10px' }}>
                   <div 
                     className="progress-bar bg-primary"
                     style={{ width: `${(monthlyExpenditure / 1000) * 100}%` }}

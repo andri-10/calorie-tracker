@@ -60,15 +60,12 @@ const Login = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <Form.Text className="text-muted">
-            We'll never share your email with anyone else.
-          </Form.Text>
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="formBasicPassword">
           <Form.Label>Password</Form.Label>
           <Form.Control
-            type={showPassword ? 'text' : 'password'} // Toggles the password visibility based on checkbox
+            type={showPassword ? 'text' : 'password'}
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -80,9 +77,8 @@ const Login = () => {
             type="checkbox"
             label="Show password"
             checked={showPassword}
-            onChange={(e) => setShowPassword(e.target.checked)} // Toggles password visibility
+            onChange={(e) => setShowPassword(e.target.checked)}
           />
-          <Form.Check type="checkbox" label="Keep me signed in" />
         </Form.Group>
 
         <Button variant="primary" type="submit">
