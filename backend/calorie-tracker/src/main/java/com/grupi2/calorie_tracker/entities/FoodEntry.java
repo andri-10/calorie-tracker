@@ -1,37 +1,57 @@
 package com.grupi2.calorie_tracker.entities;
 
 import jakarta.persistence.*;
-import lombok.*;
+import jakarta.validation.constraints.*;
+import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Data
 @Table(name = "foodentries")
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
+@Data
 public class FoodEntry {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @NotNull
     @Column(name = "date_time", nullable = false)
     private LocalDateTime dateTime;
 
-    @Column(name = "food_name", nullable = false, length = 255)
+    @NotBlank
+    @Size(max = 255)
+    @Column(name = "food_name", nullable = false)
     private String foodName;
 
-    @Column(name = "calories", nullable = false)
+    @NotNull
+    @Min(0)
+    @Column(nullable = false)
     private Integer calories;
 
-    @Column(name = "price", nullable = false, precision = 10, scale = 2)
+    @NotNull
+    @DecimalMin("0.00")
+    @Digits(integer = 8, fraction = 2)
+    @Column(nullable = false)
     private BigDecimal price;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "meal_type", nullable = false)
+    private MealType mealType;
+
+    @Column(length = 1000)
+    private String description;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }
