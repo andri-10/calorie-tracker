@@ -1,0 +1,131 @@
+body {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  margin: 0;
+  padding: 0;
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  animation: showUp 0.6s ease-out;
+  margin: 0;
+  width: 100%; /* Ensure the container takes full width */
+  box-sizing: border-box; /* Prevent overflow */
+}
+
+.login-message {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.login-message h2 {
+  font-size: 36px;
+  color: #133d87;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.login-message p {
+  font-size: 16px;
+  color: #608bc0;
+  font-weight: bold;
+}
+
+.login-card {
+  background: white;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  transform: scale(1);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  margin: 0; /* Ensure there's no margin to shift the card */
+  box-sizing: border-box; /* Avoid overflow issues */
+}
+
+.login-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+.login-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;     
+}
+
+.login-logo a {
+  display: inline-block;
+  border: 1px solid transparent;
+  border-radius: 10px;           
+  padding: 5px;                
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+.login-logo a:hover {
+  border-color: #007bff;
+  transform: scale(1.05);
+}
+
+.no-underline {
+  text-decoration: none;
+}
+
+.no-underline:hover {
+  text-decoration: underline;
+}
+
+.form-control {
+  border: 2px solid #e1e1e1;
+  border-radius: 8px;
+  padding: 12px;
+  width: 100%;
+  transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #007bff;
+  box-shadow: none;
+}
+
+.shake-animation {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes showUp {
+  0% {
+    opacity: 0;  /* Start with full transparency */
+    transform: translateY(20px);  /* Start below the normal position */
+  }
+  100% {
+    opacity: 1;  /* Fully visible */
+    transform: translateY(0);  /* Move to normal position */
+  }
+}

@@ -6,9 +6,11 @@ const Navbar = () => {
   return (
     <nav className="navbar navbar-expand-lg sticky-top" style={{ backgroundColor: '#E3F2FD' }}>
       <div className="container">
+      <div header-logo>
         <Link className="navbar-brand d-flex align-items-center" to="/dashboard">
-          <img src={headerLogo} alt="Logo" width="200" height="30" className="me-2" />
+          <img src={headerLogo} alt="Logo" width="200" height="30" className="me-2 " />
         </Link>
+      </div>
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span className="navbar-toggler-icon"></span>
         </button>

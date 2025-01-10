@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Button, Form, Container } from 'react-bootstrap';
 import './register.css';
+import headerLogo from '../../images/header-logo.png'; // Assuming the logo is used here too
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -30,13 +32,13 @@ const Register = () => {
 
     // Empty fields validation
     if (!name || !email || !password || !confirmPass) {
-      setSms('Please fill in all fields');
+      setSms('Please fill in all fields!');
       setSmsColor('red');
       return;
     }
 
     // Email validation
-    if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+    if (!/^[a-zA-Z0-9._%+-]+@[a-zAZ0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
       setSms('Email is invalid');
       setSmsColor('red');
       setFormData(prev => ({
@@ -78,7 +80,6 @@ const Register = () => {
         name,
         email,
         password
-        // No need to send role as it defaults to USER in the backend
       });
 
       if (response.status === 200) {
@@ -115,68 +116,88 @@ const Register = () => {
 
   return (
     <Container className="register-container">
-      <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3" controlId="formBasicName">
-          <Form.Label>Name</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter your name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-          />
-        </Form.Group>
+      <div className="register-message">
+        <h2>Create an Account</h2>
+        <p>Join us and start tracking your calories today!</p>
+      </div>
 
-        <Form.Group className="mb-3" controlId="formBasicEmail">
-          <Form.Label>Email address</Form.Label>
-          <Form.Control
-            type="email"
-            placeholder="Enter email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-          />
-          <Form.Text className="text-muted">
-            We'll never share your email with anyone else.
-          </Form.Text>
-        </Form.Group>
+      <div className="register-card">
+        <Form onSubmit={handleSubmit} className="register-form">
+        <div className="login-logo mb-2">
+            <Link className="d-flex align-items-center" to="/dashboard">
+              <img src={headerLogo} alt="Logo" width="250" height="40" className="me-2" />
+            </Link>
+          </div>
 
-        <Form.Group className="mb-3" controlId="formBasicPassword">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-          />
-        </Form.Group>
+          <Form.Group className="mb-3" controlId="formBasicName">
+            <Form.Label>Name</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter your name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+            />
+          </Form.Group>
 
-        <Form.Group className="mb-3" controlId="formBasicConfirmPassword">
-          <Form.Label>Confirm Password</Form.Label>
-          <Form.Control
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Confirm Password"
-            name="confirmPass"
-            value={formData.confirmPass}
-            onChange={handleChange}
-          />
-        </Form.Group>
+          <Form.Group className="mb-3" controlId="formBasicEmail">
+            <Form.Label>Email address</Form.Label>
+            <Form.Control
+              type="email"
+              placeholder="Enter email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+            />
+          </Form.Group>
 
-        <Form.Group className="mb-3" controlId="formBasicCheckbox">
-          <Form.Check
-            type="checkbox"
-            label="Show password"
-            checked={showPassword}
-            onChange={(e) => setShowPassword(e.target.checked)}
-          />
-        </Form.Group>
+          <Form.Group className="mb-3" controlId="formBasicPassword">
+            <Form.Label>Password</Form.Label>
+            <Form.Control
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+            />
+          </Form.Group>
 
-        <Button variant="primary" type="submit">
-          Submit
-        </Button>
-        <p style={{ color: smsColor }}>{sms}</p>
-      </Form>
+          <Form.Group className="mb-3" controlId="formBasicConfirmPassword">
+            <Form.Label>Confirm Password</Form.Label>
+            <Form.Control
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Confirm Password"
+              name="confirmPass"
+              value={formData.confirmPass}
+              onChange={handleChange}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3" controlId="formBasicCheckbox">
+            <Form.Check
+              type="checkbox"
+              label="Show password"
+              checked={showPassword}
+              onChange={(e) => setShowPassword(e.target.checked)}
+            />
+          </Form.Group>
+
+          <Button variant="primary" type="submit" className="register-button">
+            Register
+          </Button>
+
+          {sms && <p className={smsColor === 'red' ? 'error-message' : 'success-message'}>{sms}</p>}
+
+          <div className="register-footer">
+            <p>
+              Already have an account?{' '}
+              <Link to="/login" className="text-primary fw-bold no-underline">
+                Login here
+              </Link>
+            </p>
+          </div>
+        </Form>
+      </div>
     </Container>
   );
 };
