@@ -4,6 +4,8 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import com.grupi2.calorie_tracker.entities.MealType;
+
 
 @Data
 public class FoodEntryRequest {

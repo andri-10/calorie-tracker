@@ -3,21 +3,28 @@ package com.grupi2.calorie_tracker.controllers;
 import com.grupi2.calorie_tracker.dto.FoodEntryRequest;
 import com.grupi2.calorie_tracker.entities.FoodEntry;
 import com.grupi2.calorie_tracker.services.FoodEntryService;
+import com.grupi2.calorie_tracker.security.CustomUserDetails;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/food-entries")
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class FoodEntryController {
+
     private final FoodEntryService foodEntryService;
 
+    @Autowired
+    public FoodEntryController(FoodEntryService foodEntryService) {
+        this.foodEntryService = foodEntryService;
+    }
     @PostMapping
     public ResponseEntity<FoodEntry> createFoodEntry(
             @Valid @RequestBody FoodEntryRequest request,

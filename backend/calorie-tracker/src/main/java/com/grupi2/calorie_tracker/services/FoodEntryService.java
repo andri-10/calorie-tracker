@@ -17,8 +17,8 @@ public class FoodEntryService {
     private final UserService userService;
 
     @Transactional
-    public FoodEntry createFoodEntry(FoodEntryRequest request, String email) {
-        User user = userService.findByEmail(email);
+    public FoodEntry createFoodEntry(FoodEntryRequest request, Long userId) {
+        User user = userService.getUserById(userId);
 
         FoodEntry foodEntry = new FoodEntry();
         foodEntry.setUser(user);
