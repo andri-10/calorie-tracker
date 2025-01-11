@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -50,5 +52,25 @@ public class FoodEntryController {
         Long userId = ((CustomUserDetails) userDetails).getId();
         Integer calories = foodEntryService.getDailyCalories(userId, date);
         return ResponseEntity.ok(calories != null ? calories : 0);
+    }
+
+    @GetMapping("/calories/high-calorie-days")
+    public ResponseEntity<List<LocalDateTime>> getHighCalorieDays(
+            @RequestParam int year,
+            @RequestParam int month,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = ((CustomUserDetails) userDetails).getId();
+        List<LocalDateTime> highCalorieDays = foodEntryService.getHighCalorieDays(userId, year, month, 2500);
+        return ResponseEntity.ok(highCalorieDays);
+    }
+
+    @GetMapping("/spending/monthly")
+    public ResponseEntity<BigDecimal> getMonthlySpending(
+            @RequestParam int year,
+            @RequestParam int month,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = ((CustomUserDetails) userDetails).getId();
+        BigDecimal spending = foodEntryService.getMonthlySpending(userId, year, month);
+        return ResponseEntity.ok(spending);
     }
 }
