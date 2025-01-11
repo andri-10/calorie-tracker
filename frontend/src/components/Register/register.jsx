@@ -192,7 +192,7 @@ const Register = () => {
             <p>
               Already have an account?{' '}
               <Link to="/login" className="text-primary fw-bold no-underline">
-                Login here
+                Login here.
               </Link>
             </p>
           </div>

@@ -106,7 +106,7 @@ const Login = () => {
           </Form.Group>
 
           <Button class="login-button" type="submit" className="w-100">
-            Sign in
+            Log in
           </Button>
 
           {sms && <p style={{ color: smsColor, marginTop: '10px' }}>{sms}</p>}
