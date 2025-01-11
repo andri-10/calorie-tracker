@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button, Form, Container } from 'react-bootstrap';
 import './login.css';
 import headerLogo from '../../images/header-logo.png';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [sms, setSms] = useState('');
@@ -36,6 +37,7 @@ const Login = () => {
         localStorage.setItem('jwtToken', token);
         setSms('Login successful');
         setSmsColor('green');
+        navigate('/dashboard');
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
