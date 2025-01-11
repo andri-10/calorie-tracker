@@ -68,9 +68,30 @@ body {
   transition: border-color 0.3s ease, transform 0.3s ease;
 }
 
+
 .login-logo a:hover {
   border-color: #007bff;
   transform: scale(1.05);
+}
+
+.login-button {
+  width: 100%;
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  background: #133d87;
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+
+.login-button:hover {
+  background: #0f2d64;
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(19, 61, 135, 0.2);
 }
 
 .no-underline {

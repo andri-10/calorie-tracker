@@ -67,7 +67,7 @@ const Login = () => {
       <div className="login-card">
         <Form onSubmit={handleSubmit}>
           <div className="login-logo mb-2">
-            <Link className="d-flex align-items-center" to="/dashboard">
+            <Link className="d-flex align-items-center" to="/">
               <img src={headerLogo} alt="Logo" width="250" height="40" className="me-2" />
             </Link>
           </div>
@@ -105,7 +105,7 @@ const Login = () => {
             />
           </Form.Group>
 
-          <Button variant="primary" type="submit" className="w-100">
+          <Button class="login-button" type="submit" className="w-100">
             Sign in
           </Button>
 
