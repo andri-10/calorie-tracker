@@ -1,0 +1,113 @@
+.history-container {
+  padding: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.filters {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.filters button {
+  min-width: 120px;
+  transition: all 0.3s ease;
+}
+
+.history-entries {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.history-entry {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: white;
+}
+
+.history-entry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.history-entry .card-body {
+  padding: 20px;
+}
+
+.history-entry .card-title {
+  color: #2d3436;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.history-entry .text-muted {
+  font-size: 0.9rem;
+}
+
+.history-entry .text-success {
+  color: #00b894 !important;
+  font-weight: 600;
+}
+
+/* Loading spinner styles */
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+  color: #007bff;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+/* Animation classes */
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 300ms ease-in;
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 300ms ease-in;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .history-container {
+    padding: 15px;
+  }
+
+  .filters {
+    flex-wrap: wrap;
+  }
+
+  .filters button {
+    width: calc(50% - 5px);
+    min-width: unset;
+  }
+}
+
+@media (max-width: 480px) {
+  .history-entry .card-body {
+    padding: 15px;
+  }
+
+  .filters button {
+    width: 100%;
+  }
+}
