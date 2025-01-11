@@ -124,7 +124,7 @@ const Register = () => {
       <div className="register-card">
         <Form onSubmit={handleSubmit} className="register-form">
         <div className="login-logo mb-2">
-            <Link className="d-flex align-items-center" to="/dashboard">
+            <Link className="d-flex align-items-center" to="/">
               <img src={headerLogo} alt="Logo" width="250" height="40" className="me-2" />
             </Link>
           </div>

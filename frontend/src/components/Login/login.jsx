@@ -72,6 +72,7 @@ const Login = () => {
       <div className="login-card">
         <Form onSubmit={handleSubmit}>
           <div className="login-logo mb-2">
+           
             <Link className="d-flex align-items-center" to="/">
               <img src={headerLogo} alt="Logo" width="250" height="40" className="me-2" />
             </Link>
