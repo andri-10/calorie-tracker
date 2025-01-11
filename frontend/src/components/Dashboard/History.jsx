@@ -40,58 +40,66 @@ const History = () => {
   };
 
   return (
-    
-    <div className="history-container animate-fade-in">
-      
-      <h2 className="text-center mb-4">Food History</h2>
+    <div className="min-vh-100 bg-light">
+      <Navbar />
+      <div className="container mt-4 animate-fade-in">
+        <h2 className="text-center mb-4">Food History</h2>
 
-      <div className="filters mb-4">
-        <button
-          className={`btn ${dateRange === 'week' ? 'btn-primary' : 'btn-outline-primary'} me-2`}
-          onClick={() => setDateRange('week')}
-        >
-          This Week
-        </button>
-        <button
-          className={`btn ${dateRange === 'month' ? 'btn-primary' : 'btn-outline-primary'} me-2`}
-          onClick={() => setDateRange('month')}
-        >
-          This Month
-        </button>
-        <button
-          className={`btn ${dateRange === 'all' ? 'btn-primary' : 'btn-outline-primary'}`}
-          onClick={() => setDateRange('all')}
-        >
-          All Time
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="text-center">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
+        <div className="filters mb-4 text-center">
+          <button
+            className={`btn ${dateRange === 'week' ? 'btn-primary' : 'btn-outline-primary'} me-2`}
+            onClick={() => setDateRange('week')}
+          >
+            This Week
+          </button>
+          <button
+            className={`btn ${dateRange === 'month' ? 'btn-primary' : 'btn-outline-primary'} me-2`}
+            onClick={() => setDateRange('month')}
+          >
+            This Month
+          </button>
+          <button
+            className={`btn ${dateRange === 'all' ? 'btn-primary' : 'btn-outline-primary'}`}
+            onClick={() => setDateRange('all')}
+          >
+            All Time
+          </button>
         </div>
-      ) : (
-        <div className="history-entries animate-slide-in">
-          {entries.map((entry, index) => (
-            <div key={index} className="history-entry card mb-3">
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h5 className="card-title">{entry.food}</h5>
-                    <p className="card-text text-muted">{formatDate(entry.date)}</p>
-                  </div>
-                  <div className="text-end">
-                    <h6 className="mb-0">{entry.calories} calories</h6>
-                    <p className="text-success mb-0">€{entry.price.toFixed(2)}</p>
-                  </div>
-                </div>
-              </div>
+
+        {loading ? (
+          <div className="text-center">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        ) : (
+          <div className="card shadow-sm animate-slide-in">
+            <div className="table-responsive">
+              <table className="table table-hover mb-0">
+                <thead className="table-light">
+                  <tr>
+                    <th>Food Item</th>
+                    <th>Meal Type</th>
+                    <th>Date</th>
+                    <th>Calories</th>
+                    <th>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {entries.map((entry, index) => (
+                    <tr key={index}>
+                      <td>{entry.food}</td>
+                      <td>{formatDate(entry.date)}</td>
+                      <td>{entry.calories} cal</td>
+                      <td>€{entry.price.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
