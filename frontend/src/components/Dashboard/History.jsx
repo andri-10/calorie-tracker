@@ -209,6 +209,7 @@ const History = () => {
                   <button
                     type="button"
                     className="btn btn-outline-secondary"
+                    style={{ height: '37px' }}
                     onClick={clearSearch}
                   >
                     Clear
@@ -257,7 +258,7 @@ const History = () => {
                             </React.Fragment>
                           ))}
                           <tr className="table-light">
-                            <td colSpan="2" className="text-center fw-bold">Total</td>
+                            <td colSpan="2" className="text-center fw-bold text-primary">Total</td>
                             <td className="fw-bold text-primary">
                               {entries.reduce((total, entry) => total + entry.calories, 0)}
                             </td>
@@ -272,8 +273,8 @@ const History = () => {
                 ))}
                 {dateRange !== 'day' && (
                   <div className="mt-3 text-center">
-                    <strong>Total Calories Across All Entries: </strong>
-                    <span className="text-primary">{totalCalories}</span> kcal
+                    <strong>Total Calories Across All Entries: 
+                    <span className="text-primary"> {totalCalories} kcal</span> </strong>
                   </div>
                 )}
               </div>

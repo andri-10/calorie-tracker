@@ -1,30 +1,50 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import headerLogo from '../../images/header-logo.png';
 
-
 const Navbar = () => {
+  const location = useLocation();
+
+  const getLinkClass = (path) => 
+    `nav-link fw-medium link-primary ${location.pathname === path ? 'active' : ''}`;
+
   return (
-    <nav className="navbar navbar-expand-lg sticky-top" style={{ backgroundColor: '#E3F2FD' }}>
+    <nav className="navbar navbar-expand-lg" style={{ backgroundColor: '#E3F2FD' }}>
       <div className="container">
-      <div header-logo>
-        <Link className="navbar-brand d-flex align-items-center link-primary " to="/dashboard">
-          <img src={headerLogo} alt="Logo" width="200" height="30" className="me-2 " />
-        </Link>
-      </div>
-        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <div header-logo>
+          <Link className="navbar-brand d-flex align-items-center link-primary" to="/dashboard">
+            <img src={headerLogo} alt="Logo" width="200" height="30" className="me-2" />
+          </Link>
+        </div>
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
-              <Link className="nav-link fw-medium link-primary" to="/dashboard/add-food">Add Food</Link>
+              <Link className={getLinkClass('/dashboard')} to="/dashboard">
+                Dashboard
+              </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link fw-medium link-primary" to="/dashboard/history">History</Link>
+              <Link className={getLinkClass('/dashboard/add-food')} to="/dashboard/add-food">
+                Add Food
+              </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link fw-medium link-primary" to="/dashboard/expenses">Expenses</Link>
+              <Link className={getLinkClass('/dashboard/history')} to="/dashboard/history">
+                History
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link fw-medium" to="/">
+                Log Out
+              </Link>
             </li>
           </ul>
         </div>
