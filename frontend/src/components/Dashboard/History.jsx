@@ -286,9 +286,7 @@ const History = () => {
           </>
         )}
       </div>
-      <footer className="landing-footer mt-auto">
-         <p className="text-center">&copy; CaloriesTracker 2025. All Rights Reserved.</p>
-    </footer>
+      
     </div>
   );
 };

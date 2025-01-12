@@ -1,12 +1,23 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import headerLogo from '../../images/header-logo.png';
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const getLinkClass = (path) => 
+  const getLinkClass = (path) =>
     `nav-link fw-medium link-primary ${location.pathname === path ? 'active' : ''}`;
+
+  const handleLogout = (e) => {
+    e.preventDefault(); // Prevent default navigation behavior
+
+    // Clear the JWT token from localStorage
+    localStorage.removeItem('jwtToken');
+
+    // Redirect the user to the login page
+    navigate('/');
+  };
 
   return (
     <nav className="navbar navbar-expand-lg" style={{ backgroundColor: '#E3F2FD' }}>
@@ -42,7 +53,11 @@ const Navbar = () => {
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link fw-medium" to="/">
+              <Link
+                className="nav-link fw-medium link-primary"
+                to="/"
+                onClick={handleLogout}
+              >
                 Log Out
               </Link>
             </li>

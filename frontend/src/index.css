@@ -3,10 +3,6 @@ body {
   padding-top: 56px;
 }
 
-.min-vh-100 {
-  padding: 0;
-}
-
 .navbar {
   position: fixed;
   top: 0;

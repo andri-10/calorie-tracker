@@ -46,7 +46,7 @@ const LandingPage = () => {
         </div>
       </div>
 
-      {/* Footer */}
+    
       <footer className="landing-footer">
         <p>&copy; CaloriesTracker 2025. All Rights Reserved.</p>
       </footer>
