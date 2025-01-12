@@ -1,7 +1,7 @@
 # User Stories
 
 ## Account Management
-1. **As a user, I want to register an account by providing my email, and password, so that I can access the application securely.**  
+1. **As a user, I want to register an account by providing my name, email, and password, so that I can access the application securely.**  
    - **Points:** 2 points
 
 2. **As a user, I want to log in to my account using my email and password, so that I can access my personalized dashboard.**  
