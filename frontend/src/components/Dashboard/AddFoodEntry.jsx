@@ -8,7 +8,7 @@ const AddFoodEntry = () => {
     price: '',
     mealType: '',
     description: '',
-    dateTime: new Date().toISOString().slice(0, 16)
+    dateTime: new Date().toISOString() // Set the default to the current timestamp
   });
 
   const [error, setError] = useState('');
@@ -19,7 +19,7 @@ const AddFoodEntry = () => {
     // Get token when component mounts
     const storedToken = localStorage.getItem('jwtToken');
     setToken(storedToken);
-    
+
     // Debug log - remove in production
     console.log('Token from localStorage:', storedToken);
   }, []);
@@ -34,19 +34,18 @@ const AddFoodEntry = () => {
     try {
       // Get token again in case it was updated
       const currentToken = localStorage.getItem('jwtToken');
-      
-      // Debug log - remove in production
-      console.log('Token at submission:', currentToken);
-
       if (!currentToken) {
         throw new Error('Not authenticated - No token found');
       }
+
+      // Here we base the dateTime on the current system time (i.e., when the food entry is created)
+      const currentDateTime = new Date().toISOString(); // Get the current UTC time
 
       const response = await fetch('http://localhost:8080/api/food-entries', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${currentToken}`
+          'Authorization': `Bearer ${currentToken}`,
         },
         body: JSON.stringify({
           foodName: foodEntry.foodName,
@@ -54,31 +53,18 @@ const AddFoodEntry = () => {
           price: parseFloat(foodEntry.price),
           mealType: foodEntry.mealType,
           description: foodEntry.description,
-          dateTime: new Date(foodEntry.dateTime).toISOString()
-        })
+          dateTime: currentDateTime, // Send current date and time from the system (UTC)
+        }),
       });
 
-      // Debug log - remove in production
-      console.log('Response status:', response.status);
-      
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.log('Error response:', errorData);
-        throw new Error(`Failed to add food entry: ${errorData}`);
+      if (response.ok) {
+        setSuccess(true);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to add food entry.');
       }
-
-      setSuccess(true);
-      setFoodEntry({
-        foodName: '',
-        calories: '',
-        price: '',
-        mealType: '',
-        description: '',
-        dateTime: new Date().toISOString().slice(0, 16)
-      });
-    } catch (err) {
-      setError(err.message);
-      console.error('Submission error:', err);
+    } catch (error) {
+      setError(error.message || 'An error occurred while submitting the food entry.');
     }
   };
 
@@ -173,16 +159,6 @@ const AddFoodEntry = () => {
                     />
                   </div>
 
-                  <div className="mb-3">
-                    <label className="form-label fw-medium">Date and Time</label>
-                    <input
-                      type="datetime-local"
-                      className="form-control"
-                      value={foodEntry.dateTime}
-                      onChange={(e) => setFoodEntry({...foodEntry, dateTime: e.target.value})}
-                      required
-                    />
-                  </div>
 
                   <div className="mb-3">
                     <label className="form-label fw-medium">Description (Optional)</label>

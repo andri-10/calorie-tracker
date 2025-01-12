@@ -9,8 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -63,5 +66,26 @@ public class FoodEntryService {
     public BigDecimal getMonthlySpending(Long userId, int year, int month) {
         BigDecimal spending = foodEntryRepository.calculateMonthlySpending(userId, year, month);
         return spending != null ? spending : BigDecimal.ZERO;
+    }
+
+
+    // Gets all food entries for a specific week of a specific year
+    public List<FoodEntry> getUserFoodEntriesForWeek(Long userId, int year, int week) {
+        // Calculate the start and end of the week and return the entries
+        LocalDate startOfWeek = LocalDate.of(year, 1, 1).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).plusWeeks(week - 1);
+        LocalDate endOfWeek = startOfWeek.plusDays(6);
+        return foodEntryRepository.findByUserIdAndDateTimeBetweenOrderByDateTimeDesc(userId, startOfWeek.atStartOfDay(), endOfWeek.atTime(23, 59, 59));
+    }
+
+    // Gets all food entries for a specific month of a specific year
+    public List<FoodEntry> getUserFoodEntriesForMonth(Long userId, int year, int month) {
+        LocalDate startOfMonth = LocalDate.of(year, month, 1);
+        LocalDate endOfMonth = startOfMonth.plusMonths(1).minusDays(1);
+        return foodEntryRepository.findByUserIdAndDateTimeBetweenOrderByDateTimeDesc(userId, startOfMonth.atStartOfDay(), endOfMonth.atTime(23, 59, 59));
+    }
+
+    public List<FoodEntry> getUserFoodEntriesForAllTime(Long userId) {
+
+        return foodEntryRepository.findByUserIdOrderByDateTimeDesc(userId);
     }
 }

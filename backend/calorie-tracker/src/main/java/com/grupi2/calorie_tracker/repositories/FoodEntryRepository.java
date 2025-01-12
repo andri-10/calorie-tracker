@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 
 public interface FoodEntryRepository extends JpaRepository<FoodEntry, Long> {
+    List<FoodEntry> findByUserIdOrderByDateTimeDesc(Long userId);
     List<FoodEntry> findByUserIdAndDateTimeBetweenOrderByDateTimeDesc(
             Long userId, LocalDateTime start, LocalDateTime end);
 
