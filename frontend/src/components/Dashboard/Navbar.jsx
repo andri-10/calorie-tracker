@@ -13,7 +13,7 @@ const Navbar = () => {
       <div className="container">
         <div header-logo>
           <Link className="navbar-brand d-flex align-items-center link-primary" to="/dashboard">
-            <img src={headerLogo} alt="Logo" width="200" height="30" className="me-2" />
+            <img src={headerLogo} alt="Logo" width="200" height="40" className="me-2" />
           </Link>
         </div>
         <button

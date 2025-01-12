@@ -71,7 +71,7 @@ const AddFoodEntry = () => {
   // If no token is found, show a message
   if (!token) {
     return (
-      <div className="min-vh-100 bg-light">
+      <div className="min-vh-100 bg-light p-0">
         <Navbar />
         <div className="container py-4">
           <div className="alert alert-warning">
@@ -83,13 +83,13 @@ const AddFoodEntry = () => {
   }
 
   return (
-    <div className="min-vh-100 bg-light">
+    <div className="min-vh-100 bg-light p-0">
       <Navbar />
-      <div className="container py-4">
+      <div className="container py-4 ">
         <div className="row justify-content-center">
           <div className="col-md-8 col-lg-6">
             <div className="card border-0 shadow-sm">
-              <div className="card-body p-4">
+              <div className="card-body p-4 card-hover animate-fade-in">
                 <h2 className="text-primary fw-bold mb-4">Add Food Entry</h2>
 
                 {error && (

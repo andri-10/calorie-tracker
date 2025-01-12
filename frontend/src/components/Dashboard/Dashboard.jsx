@@ -9,7 +9,7 @@ const Dashboard = () => {
   const [showTips, setShowTips] = useState(false);
 
   return (
-    <div className="min-vh-100 bg-light">
+    <div className="min-vh-100 bg-light p-0">
       <Navbar />
       <div className="container py-4">
         <div className="d-flex justify-content-between align-items-center mb-4">

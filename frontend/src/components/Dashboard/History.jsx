@@ -151,7 +151,7 @@ const History = () => {
   const currentMonthName = new Date(selectedYear, selectedMonth - 1).toLocaleString('default', { month: 'long' });
 
   return (
-    <div className="min-vh-100 bg-light">
+    <div className="min-vh-100 bg-light p-0">
       <Navbar />
       <div className="container mt-4 animate-fade-in">
         <h2 className="text-center mb-4">Food History</h2>
@@ -286,6 +286,9 @@ const History = () => {
           </>
         )}
       </div>
+      <footer className="landing-footer mt-auto">
+         <p className="text-center">&copy; CaloriesTracker 2025. All Rights Reserved.</p>
+    </footer>
     </div>
   );
 };
