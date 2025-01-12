@@ -37,8 +37,9 @@ const FoodList = () => {
                       className="btn btn-outline-danger btn-sm"
                       onClick={() => handleDelete(entry.id)}
                     >
-                      Delete
+                      Delete 
                     </button>
+                    
                   </td>
                 </tr>
               ))}
