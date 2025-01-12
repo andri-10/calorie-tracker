@@ -111,10 +111,6 @@ const Login = () => {
             />
           </Form.Group>
 
-<<<<<<< HEAD
-          <Button class="login-button" type="submit" className="w-100">
-            Log in
-=======
           <Button
             variant="primary"
             type="submit"
@@ -122,7 +118,6 @@ const Login = () => {
             disabled={loading}
           >
             {loading ? <Spinner as="span" animation="border" size="sm" /> : 'Sign in'}
->>>>>>> 0c2ac2a02bd0e88e9e0564bc952e918782134578
           </Button>
 
           {sms && <p style={{ color: smsColor, marginTop: '10px' }}>{sms}</p>}
