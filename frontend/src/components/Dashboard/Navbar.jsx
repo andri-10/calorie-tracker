@@ -10,12 +10,8 @@ const Navbar = () => {
     `nav-link fw-medium link-primary ${location.pathname === path ? 'active' : ''}`;
 
   const handleLogout = (e) => {
-    e.preventDefault(); // Prevent default navigation behavior
-
-    // Clear the JWT token from localStorage
+    e.preventDefault();
     localStorage.removeItem('jwtToken');
-
-    // Redirect the user to the login page
     navigate('/');
   };
 

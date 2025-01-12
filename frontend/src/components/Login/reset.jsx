@@ -5,22 +5,20 @@ import { Button, Form, Container, Spinner } from 'react-bootstrap';
 import './login.css';
 import headerLogo from '../../images/header-logo.png';
 
-const Login = () => {
+const Reset = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [sms, setSms] = useState('');
   const [smsColor, setSmsColor] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isShaking, setIsShaking] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSms('');
 
-    if (email.trim() === '' || password.trim() === '') {
-      setSms('Please fill in all fields!');
+    if (email.trim() === '') {
+      setSms('Please fill in your email!');
       setSmsColor('red');
       triggerShake();
       return;
@@ -28,23 +26,18 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:8080/users/login', {
+      const response = await axios.post('http://localhost:8080/users/reset-password', {
         email,
-        password,
       });
-      
-      if (response.status === 200) {
-        const { token } = response.data;
-       
-        localStorage.setItem('jwtToken', token);
 
-        setSms('Login successful');
+      if (response.status === 200) {
+        setSms('Password reset link sent successfully!');
         setSmsColor('green');
-        navigate('/dashboard');
+        navigate('/login');
       }
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        setSms('Invalid email or password');
+      if (error.response && error.response.status === 404) {
+        setSms('Email not found');
       } else {
         setSms('An unexpected error occurred. Please try again.');
       }
@@ -63,24 +56,22 @@ const Login = () => {
   return (
     <Container className={`login-container ${isShaking ? 'shake-animation' : ''}`}>
       <div className="login-message text-center mb-4">
-        <h2>Welcome to Calorie Tracker!</h2>
-        <p>Track your calories and achieve your health goals effortlessly.</p>
+        <h2>Reset Your Password</h2>
+        <p>Enter your email to receive a password reset link.</p>
       </div>
 
       <div className="login-card">
         <Form onSubmit={handleSubmit}>
           <div className="login-logo mb-2">
-           
             <Link className="d-flex align-items-center" to="/">
               <img src={headerLogo} alt="Logo" width="250" height="40" className="me-2" />
             </Link>
           </div>
 
           <Form.Group className="mb-3" controlId="formBasicEmail">
-            <Form.Label>Email address</Form.Label>
             <Form.Control
               type="email"
-              placeholder="Enter email"
+              placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -88,53 +79,23 @@ const Login = () => {
             />
           </Form.Group>
 
-          <Form.Group className="mb-3" controlId="formBasicPassword">
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className={isShaking ? 'shake-input' : ''}
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3" controlId="formBasicCheckbox">
-            <Form.Check
-              type="checkbox"
-              label="Show password"
-              checked={showPassword}
-              onChange={(e) => setShowPassword(e.target.checked)}
-            />
-          </Form.Group>
-          
-          <div className="text-center mt-3">
-            <p>
-              <Link to="/reset" className="text-primary fw-bold no-underline">
-                Forgot your password?
-              </Link>
-            </p>
-          </div>
-
           <Button
             variant="primary"
             type="submit"
             className="w-100"
             disabled={loading}
           >
-            {loading ? <Spinner as="span" animation="border" size="sm" /> : 'Sign in'}
+            {loading ? <Spinner as="span" animation="border" size="sm" /> : 'Send Code'}
           </Button>
 
           {sms && <p style={{ color: smsColor, marginTop: '10px' }}>{sms}</p>}
 
           <div className="text-center mt-3">
             <p>
-              Don’t have an account?{' '}
-              <Link to="/register" className="text-primary fw-bold no-underline">
-                Register here
+              Remembered your password?{' '}
+              <Link to="/login" className="text-primary fw-bold no-underline">
+                Login here
               </Link>
-              
             </p>
           </div>
         </Form>
@@ -143,4 +104,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Reset;

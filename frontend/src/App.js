@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Login from './components/Login/login';
+import Reset from './components/Login/reset';
 import Register from './components/Register/register';
 import LandingPage from './components/LandingPage/LandingPage';
 import Dashboard from './components/Dashboard/Dashboard';
@@ -16,11 +17,13 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/reset" element={<Reset />} />
         
         {/* Protected routes - you might want to add authentication checking later */}
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/add-food" element={<AddFoodEntry />} />
         <Route path="/dashboard/history" element={<History />} />
+
       </Routes>
     </div>
   );
