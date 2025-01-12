@@ -7,8 +7,13 @@ import com.grupi2.calorie_tracker.repositories.FoodEntryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -44,5 +49,19 @@ public class FoodEntryService {
         LocalDateTime endOfDay = startOfDay.plusDays(1);
         return foodEntryRepository.getTotalCaloriesForUserBetweenDates(
                 userId, startOfDay, endOfDay);
+    }
+
+    public List<LocalDateTime> getHighCalorieDays(Long userId, int year, int month, int calorieThreshold) {
+        List<Date> dates = foodEntryRepository.findHighCalorieDays(userId, year, month, calorieThreshold);
+        return dates.stream()
+                .map(date -> date.toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime())
+                .collect(Collectors.toList());
+    }
+
+    public BigDecimal getMonthlySpending(Long userId, int year, int month) {
+        BigDecimal spending = foodEntryRepository.calculateMonthlySpending(userId, year, month);
+        return spending != null ? spending : BigDecimal.ZERO;
     }
 }
