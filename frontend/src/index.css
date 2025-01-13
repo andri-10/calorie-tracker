@@ -130,13 +130,15 @@ body {
   transition: all 0.3s ease;
 }
 
-.login-btn {
+.login-btn,
+.dashboard-btn {
   background: #133d87;
   color: white;
   border: none;
 }
 
-.login-btn:hover {
+.login-btn:hover,
+.dashboard-btn:hover {
   background: #0f2d64;
   transform: scale(1.05);
   box-shadow: 0 4px 8px rgba(19, 61, 135, 0.2);

@@ -1,122 +1,158 @@
-.history-container {
-  padding: 30px;
-  max-width: 1200px;
-  margin: 0 auto;
+/* History.css */
+
+/* General styles */
+body {
+  font-family: 'Arial', sans-serif;
 }
 
-.filters {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 30px;
-}
-
-.filters button {
-  min-width: 120px;
-  transition: all 0.3s ease;
-}
-
-.history-entries {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.history-entry {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  background: white;
-}
-
-.history-entry:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.history-entry .card-body {
-  padding: 20px;
-}
-
-.history-entry .card-title {
-  color: #2d3436;
-  margin-bottom: 5px;
-  font-weight: 600;
-}
-
-.history-entry .text-muted {
-  font-size: 0.9rem;
-}
-
-.history-entry .text-success {
-  color: #00b894 !important;
-  font-weight: 600;
-}
-
-/* Loading spinner styles */
-.spinner-border {
-  width: 3rem;
-  height: 3rem;
-  color: #007bff;
-}
-
-/* Empty state */
-.empty-state {
-  text-align: center;
-  padding: 40px;
-  color: #666;
-}
-
-/* Animation classes */
-.fade-enter {
-  opacity: 0;
-}
-
-.fade-enter-active {
-  opacity: 1;
-  transition: opacity 300ms ease-in;
-}
-
-.fade-exit {
-  opacity: 1;
-}
-
-.fade-exit-active {
-  opacity: 0;
-  transition: opacity 300ms ease-in;
-}
-
-.clickable-row:hover {
-  background-color: #f1f1f1;
+.min-vh-100 {
+  min-height: 100vh;
 }
 
 .bg-light {
-  padding: 10px;
-  border-top: 1px solid #ddd;
+  background-color: #f8f9fa !important;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .history-container {
-    padding: 15px;
-  }
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
 
-  .filters {
-    flex-wrap: wrap;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
-
-  .filters button {
-    width: calc(50% - 5px);
-    min-width: unset;
+  to {
+    opacity: 1;
   }
 }
 
-@media (max-width: 480px) {
-  .history-entry .card-body {
-    padding: 15px;
-  }
+/* Header */
+h2.text-center {
+  font-weight: bold;
+  color: #333;
+}
 
-  .filters button {
-    width: 100%;
-  }
+/* Filters */
+.filters {
+  margin-bottom: 20px;
+}
+
+.filters .btn {
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+}
+
+.filters .btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.filters .btn-outline-primary {
+  border-color: #007bff;
+  color: #007bff;
+}
+
+.filters .btn:hover {
+  opacity: 0.9;
+}
+
+/* Search bar */
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-container .form-control {
+  flex-grow: 1;
+}
+
+.search-container .btn-outline-secondary {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.8rem;
+}
+
+/* Date range filters */
+.date-input-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+/* Alerts */
+.alert {
+  margin-top: 10px;
+  padding: 10px 15px;
+  font-size: 0.85rem;
+}
+
+/* Entries container */
+.entries-container {
+  margin-top: 20px;
+}
+
+.history-entry {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.history-entry .card-header {
+  background-color: #f1f1f1;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #555;
+}
+
+.history-entry .card-body {
+  padding: 15px;
+}
+
+.history-entry .table {
+  margin: 0;
+}
+
+.history-entry .table-hover tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+.history-entry .table-light {
+  background-color: #fdfdfd;
+}
+
+.history-entry .table-light td {
+  font-weight: bold;
+  color: #555;
+}
+
+.history-entry .clickable-row {
+  cursor: pointer;
+}
+
+.history-entry .clickable-row:hover {
+  background-color: #f0f8ff;
+}
+
+.history-entry .text-primary {
+  color: #007bff !important;
+}
+
+.empty-state {
+  text-align: center;
+  margin-top: 30px;
+  color: #777;
+  font-size: 1rem;
+}
+
+/* Total calories display */
+.mt-3 {
+  margin-top: 1rem !important;
+}
+
+.mt-3 strong {
+  font-size: 1.2rem;
+}
+
+.mt-3 .text-primary {
+  font-weight: bold;
 }

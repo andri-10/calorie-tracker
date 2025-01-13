@@ -29,22 +29,16 @@ const Dashboard = ({ userId }) => {
         (today.getDate() - today.getDay() + 7) / 7
       );
 
-      // Adjust the date to local midnight (00:00:00)
       today.setHours(0, 0, 0, 0); 
 
-      // Get the offset in minutes for your local time zone
       const timezoneOffset = today.getTimezoneOffset(); 
 
-      // Adjust the date to reflect the local time zone offset
       today.setMinutes(today.getMinutes() - timezoneOffset);
 
-      // Convert to a simple date format YYYY-MM-DDT00:00:00
       const dateParam = today.toISOString().split('T')[0] + 'T00:00:00';
 
       try {
-        const token = localStorage.getItem('jwtToken'); // or however you store your token
-
-        // Fetch daily calories
+        const token = localStorage.getItem('jwtToken');
         const dailyCaloriesResponse = await axios.get(
           `http://localhost:8080/api/food-entries/calories/daily`,
           { 
@@ -56,7 +50,6 @@ const Dashboard = ({ userId }) => {
         );
         setDailyCalories(dailyCaloriesResponse.data || 0);
 
-        // Fetch monthly spending
         const monthlySpendingResponse = await axios.get(
           `http://localhost:8080/api/food-entries/spending/monthly`,
           { params: { year: currentYear, month: currentMonth },
