@@ -7,7 +7,7 @@ import LandingPage from './components/LandingPage/LandingPage';
 import Dashboard from './components/Dashboard/Dashboard';
 import AddFoodEntry from './components/Dashboard/AddFoodEntry';
 import History from './components/Dashboard/History';
-
+import AdminDashboard from './components/Admin/AdminDashboard';
 
 function App() {
   return (
@@ -18,7 +18,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/reset" element={<Reset />} />
-        
+        <Route path="/admin" element={<AdminDashboard />} />
+
         {/* Protected routes - you might want to add authentication checking later */}
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/add-food" element={<AddFoodEntry />} />
@@ -30,3 +31,4 @@ function App() {
 }
 
 export default App;
+
