@@ -129,6 +129,14 @@ h2.text-center {
   cursor: pointer;
 }
 
+.table td, .table th {
+  white-space: nowrap; 
+}
+
+.table .table-light {
+  white-space: normal;
+}
+
 .history-entry .clickable-row:hover {
   background-color: #f0f8ff;
 }

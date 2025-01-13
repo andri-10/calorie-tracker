@@ -81,6 +81,7 @@ const History = () => {
     setDateRangeError('');
     fetchAllEntries();
   };
+  
 
   const clearSearch = () => {
     setSearchTerm('');
@@ -115,8 +116,14 @@ const History = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('jwtToken');
-      let url = `http://localhost:8080/api/food-entries/history?range=${dateRange}`;
+      let url = `http://localhost:8080/api/food-entries/history?range=all`;
 
+if (startDate && endDate) {
+  url += `&startDate=${startDate}&endDate=${endDate}`;
+}
+
+
+  
       if (dateRange === 'week') {
         url += `&year=${selectedYear}&week=${selectedWeek}`;
       } else if (dateRange === 'month') {
@@ -124,13 +131,13 @@ const History = () => {
       } else if (dateRange === 'all' && isDateRangeActive && startDate && endDate) {
         url += `&startDate=${startDate}&endDate=${endDate}`;
       }
-
+  
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
+  
       if (response.ok) {
         const data = await response.json();
         setEntries(data.entries || []);
@@ -157,7 +164,9 @@ const History = () => {
       case 'dayAndWeekday':
         return date.toLocaleDateString('en-US', {
           weekday: 'long',
-          day: 'numeric'
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
         });
       
       case 'dayOfMonth':
@@ -274,7 +283,7 @@ const History = () => {
 
             {dateRange === 'all' && (
               <div className="mb-4">
-              <p class = "fw-bold">Search your entries by range:</p>
+              <p className = "fw-bold">Search your entries by range:</p>
                 <form onSubmit={handleDateRangeSearch} className="row g-3 align-items-end">
                   {renderDateInput(startDate, (e) => setStartDate(e.target.value), 'From')}
                   {renderDateInput(endDate, (e) => setEndDate(e.target.value), 'To')}
@@ -372,16 +381,16 @@ const History = () => {
               </div>
             ) : (
               <div className="empty-state">
-                <p>
-                  {searchTerm 
-                    ? 'No food items found matching your search.' 
-                    : dateRange === 'all' && !isDateRangeActive 
-                      ? 'Please select a date range to view entries.'
-                      : isDateRangeActive 
-                        ? `No entries found between ${new Date(startDate).toLocaleDateString()} and ${new Date(endDate).toLocaleDateString()}.`
-                        : 'No entries found for this time period.'}
-                </p>
-              </div>
+  <p>
+    {searchTerm
+      ? 'No food items found matching your search.'
+      : dateRange === 'all' && !isDateRangeActive
+      ? 'Please select a date range to view entries.'
+      : isDateRangeActive
+      ? `No entries found between ${new Date(startDate).toLocaleDateString()} and ${new Date(endDate).toLocaleDateString()}.`
+      : 'No entries found for this time period.'}
+  </p>
+</div>
             )}
           </>
         )}

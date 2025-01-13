@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import fullLogo from '../../images/logo-full.png';
 import animation from '../../images/heart-animation.gif';
 import bgImage from '../../images/bg-image.png';
-import './LandingPage.css'; // Add this line for external styles
+import './LandingPage.css';
 
 const LandingPage = () => {
   const navigate = useNavigate();
