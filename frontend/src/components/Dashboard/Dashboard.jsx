@@ -1,12 +1,112 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import DailyProgress from './DailyProgress';
 import FoodList from './FoodList';
+import axios from 'axios';
+import './styles/Dashboard.css'
 
-const Dashboard = () => {
-  const [dailyCalories, setDailyCalories] = useState(1750);
-  const [monthlyExpenditure, setMonthlyExpenditure] = useState(800);
+const Dashboard = ({ userId }) => {
+  const [dailyCalories, setDailyCalories] = useState(0);
+  const [monthlyExpenditure, setMonthlyExpenditure] = useState(0);
+  const [averageDailyCalories, setAverageDailyCalories] = useState(0);
+  const [weeklySpending, setWeeklySpending] = useState(0);
   const [showTips, setShowTips] = useState(false);
+
+  // Thresholds for the daily calories and monthly spending
+  const CALORIES_LIMIT = 2500;
+  const SPENDING_LIMIT = 1000;
+
+  // Flags to show warnings
+  const dailyCaloriesExceeded = dailyCalories > CALORIES_LIMIT;
+  const monthlyExpenditureExceeded = monthlyExpenditure > SPENDING_LIMIT;
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      const currentMonth = today.getMonth() + 1; // Months are zero-indexed
+      const currentWeek = Math.ceil(
+        (today.getDate() - today.getDay() + 7) / 7
+      );
+
+      // Adjust the date to local midnight (00:00:00)
+      today.setHours(0, 0, 0, 0); 
+
+      // Get the offset in minutes for your local time zone
+      const timezoneOffset = today.getTimezoneOffset(); 
+
+      // Adjust the date to reflect the local time zone offset
+      today.setMinutes(today.getMinutes() - timezoneOffset);
+
+      // Convert to a simple date format YYYY-MM-DDT00:00:00
+      const dateParam = today.toISOString().split('T')[0] + 'T00:00:00';
+
+      try {
+        const token = localStorage.getItem('jwtToken'); // or however you store your token
+
+        // Fetch daily calories
+        const dailyCaloriesResponse = await axios.get(
+          `http://localhost:8080/api/food-entries/calories/daily`,
+          { 
+            params: { date: dateParam },
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+        setDailyCalories(dailyCaloriesResponse.data || 0);
+
+        // Fetch monthly spending
+        const monthlySpendingResponse = await axios.get(
+          `http://localhost:8080/api/food-entries/spending/monthly`,
+          { params: { year: currentYear, month: currentMonth },
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+        setMonthlyExpenditure(monthlySpendingResponse.data || 0);
+
+        // Fetch weekly spending
+        const weeklyResponse = await axios.get(`http://localhost:8080/api/food-entries/history`, {
+          params: { range: 'week', year: currentYear, week: currentWeek },
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const weeklySpending = weeklyResponse.data.entries.reduce(
+          (sum, entry) => sum + entry.price,
+          0
+        );
+        setWeeklySpending(weeklySpending);
+
+        // Fetch all-time entries for average daily calories
+        const allEntriesResponse = await axios.get(
+          `http://localhost:8080/api/food-entries/history`,
+          { params: { range: 'all' },
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+        const totalCalories = allEntriesResponse.data.entries.reduce(
+          (sum, entry) => sum + entry.calories,
+          0
+        );
+        const activeDays = allEntriesResponse.data.entries.reduce((acc, entry) => {
+          const date = entry.dateTime.split('T')[0]; // Extract date part
+          acc.add(date); // Use a Set to store unique dates
+          return acc;
+        }, new Set()).size;
+
+        setAverageDailyCalories(activeDays > 0 ? totalCalories / activeDays : 0);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      }
+    };
+
+    fetchDashboardData();
+  }, [userId]);
 
   return (
     <div className="min-vh-100 bg-light p-0">
@@ -36,9 +136,18 @@ const Dashboard = () => {
         <div className="row g-4">
           <div className="col-md-4">
             <div className="card h-100 border-0 shadow-sm card-hover">
-              <div className="card-body">
+              <div className="card-body today-calories">
+                <div>
                 <h5 className="card-title text-primary fw-bold">Today's Calories</h5>
-                <h2 className="display-6 fw-bold mb-3">{dailyCalories} / 2,500</h2>
+                <h2 
+                  className={`display-6 fw-bold mb-3 ${dailyCaloriesExceeded ? 'text-danger' : ''}`}
+                >
+                  {dailyCalories} / 2,500
+                </h2>
+                {dailyCaloriesExceeded && (
+                  <p className="text-danger">You've exceeded your daily calorie limit!</p>
+                )}
+                </div>
                 <DailyProgress calories={dailyCalories} maxCalories={2500} />
               </div>
             </div>
@@ -46,12 +155,21 @@ const Dashboard = () => {
 
           <div className="col-md-4">
             <div className="card h-100 border-0 shadow-sm card-hover">
-              <div className="card-body">
+              <div className="card-body monthly-spending">
+                <div>
                 <h5 className="card-title text-primary fw-bold">Monthly Spending</h5>
-                <h2 className="display-6 fw-bold mb-0">€{monthlyExpenditure.toFixed(2)}</h2>
+                <h2 
+                  className={`display-6 fw-bold mb-3 ${monthlyExpenditureExceeded ? 'text-danger' : ''}`}
+                >
+                  €{monthlyExpenditure.toFixed(2)}
+                </h2>
+                {monthlyExpenditureExceeded && (
+                  <p className="text-danger">You've exceeded your monthly spending limit!</p>
+                )}
+              </div>
                 <div className="progress mt-5" style={{ height: '10px' }}>
                   <div 
-                    className="progress-bar bg-primary"
+                    className={`progress-bar ${monthlyExpenditureExceeded ? 'bg-danger' : 'bg-primary'}`}
                     style={{ width: `${(monthlyExpenditure / 1000) * 100}%` }}
                   ></div>
                 </div>
@@ -67,13 +185,13 @@ const Dashboard = () => {
                   <div className="list-group-item border-0 px-0">
                     <div className="d-flex justify-content-between">
                       <span>Average Daily Calories</span>
-                      <span className="fw-bold">2,100</span>
+                      <span className="fw-bold">{averageDailyCalories.toFixed(0)}</span>
                     </div>
                   </div>
                   <div className="list-group-item border-0 px-0">
                     <div className="d-flex justify-content-between">
                       <span>This Week's Total</span>
-                      <span className="fw-bold">€145.50</span>
+                      <span className="fw-bold">€{weeklySpending.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
