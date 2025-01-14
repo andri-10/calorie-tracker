@@ -10,13 +10,12 @@ import AddFoodEntry from './components/Dashboard/AddFoodEntry';
 import History from './components/Dashboard/History';
 import AdminDashboard from './components/Admin/AdminDashboard';
 
-// Protected Route wrapper component
+
 const ProtectedRoute = ({ element }) => {
   const location = useLocation();
   const isAuthenticated = checkTokenValidity();
 
   if (!isAuthenticated) {
-    // Save the attempted path to localStorage
     localStorage.setItem('redirectPath', location.pathname);
     return <Navigate to="/login" replace />;
   }

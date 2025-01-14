@@ -14,15 +14,12 @@ const Dashboard = ({ userId }) => {
   const [weeklySpending, setWeeklySpending] = useState(0);
   const [showTips, setShowTips] = useState(false);
 
-  // Thresholds for the daily calories and monthly spending
   const CALORIES_LIMIT = 2500;
   const SPENDING_LIMIT = 1000;
 
-  // Flags to show warnings
   const dailyCaloriesExceeded = dailyCalories > CALORIES_LIMIT;
   const monthlyExpenditureExceeded = monthlyExpenditure > SPENDING_LIMIT;
 
-  // Function to get token from storage
   const getToken = () => {
     const tokenData = localStorage.getItem('jwtToken');
     if (!tokenData) {
@@ -35,7 +32,6 @@ const Dashboard = ({ userId }) => {
       const now = new Date().getTime();
       
       if (now - timestamp > expiresIn) {
-        // Token has expired
         localStorage.removeItem('jwtToken');
         navigate('/login');
         return null;

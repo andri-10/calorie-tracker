@@ -3,6 +3,7 @@ package com.grupi2.calorie_tracker.services;
 import com.grupi2.calorie_tracker.entities.User;
 import com.grupi2.calorie_tracker.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,5 +41,15 @@ public class UserService {
         } else {
             throw new RuntimeException("User not found with id: " + userId);
         }
+    }
+
+    public void updatePassword(String email, String newPassword) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found with email: " + email);
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 }
