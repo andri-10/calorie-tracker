@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import './styles/History.css';
-
+import calorie from '../../images/favicon.png';
 
 const History = () => {
   const getISOWeek = (date) => {
@@ -26,8 +26,32 @@ const History = () => {
   const [endDate, setEndDate] = useState('');
   const [isDateRangeActive, setIsDateRangeActive] = useState(false);
   const [dateRangeError, setDateRangeError] = useState('');
-
   const today = new Date().toISOString().split('T')[0];
+
+  const getToken = () => {
+    const tokenData = localStorage.getItem('jwtToken');
+    if (!tokenData) {
+      window.location.href = '/login'; // Redirect to login
+      return null;
+    }
+
+    try {
+      const { value, timestamp, expiresIn } = JSON.parse(tokenData);
+      const now = new Date().getTime();
+
+      if (now - timestamp > expiresIn) {
+        localStorage.removeItem('jwtToken');
+        window.location.href = '/login'; // Redirect to login
+        return null;
+      }
+
+      return value;
+    } catch (error) {
+      localStorage.removeItem('jwtToken');
+      window.location.href = '/login'; // Redirect to login
+      return null;
+    }
+  };
 
   useEffect(() => {
     if (dateRange !== 'all') {
@@ -53,15 +77,15 @@ const History = () => {
       setDateRangeError('Please select both start and end dates');
       return false;
     }
-    
+
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
+
     if (end < start) {
       setDateRangeError('End date must be after start date');
       return false;
     }
-    
+
     setDateRangeError('');
     return true;
   };
@@ -81,7 +105,6 @@ const History = () => {
     setDateRangeError('');
     fetchAllEntries();
   };
-  
 
   const clearSearch = () => {
     setSearchTerm('');
@@ -90,7 +113,9 @@ const History = () => {
   const fetchAllEntries = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('jwtToken');
+      const token = getToken();
+      if (!token) return; // If no valid token, stop the fetch
+
       const url = `http://localhost:8080/api/food-entries/history?range=all`;
 
       const response = await fetch(url, {
@@ -115,15 +140,15 @@ const History = () => {
   const fetchEntries = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('jwtToken');
+      const token = getToken();
+      if (!token) return; // If no valid token, stop the fetch
+
       let url = `http://localhost:8080/api/food-entries/history?range=all`;
 
-if (startDate && endDate) {
-  url += `&startDate=${startDate}&endDate=${endDate}`;
-}
+      if (startDate && endDate) {
+        url += `&startDate=${startDate}&endDate=${endDate}`;
+      }
 
-
-  
       if (dateRange === 'week') {
         url += `&year=${selectedYear}&week=${selectedWeek}`;
       } else if (dateRange === 'month') {
@@ -131,13 +156,13 @@ if (startDate && endDate) {
       } else if (dateRange === 'all' && isDateRangeActive && startDate && endDate) {
         url += `&startDate=${startDate}&endDate=${endDate}`;
       }
-  
+
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       if (response.ok) {
         const data = await response.json();
         setEntries(data.entries || []);
@@ -145,7 +170,7 @@ if (startDate && endDate) {
         setTotalCalories(data.totalCalories || 0);
       }
     } catch (error) {
-      console.error('Error fetching history:', error);
+      console.error('Error fetching entries:', error);
     } finally {
       setLoading(false);
     }
@@ -379,9 +404,15 @@ if (startDate && endDate) {
 
                 {dateRange !== 'day' && (
                   <div className="mt-3 mb-4 text-center">
-                    <strong>Total Calories: 
-                    <span className="text-dark"> {totalCalories} kcal</span></strong>
-                  </div>
+                  <strong>Total Calories:  
+                    <span className="text-dark ms-2">  
+                      {totalCalories} kcal 
+                      <img src={calorie} style={{ height: '25px', width: 'auto' }} className="mb-2"alt="calorie-icon" />
+                    </span>
+                  </strong>
+                </div>
+                
+                
                 )}
               </div>
             ) : (

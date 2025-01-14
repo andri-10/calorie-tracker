@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import DailyProgress from './DailyProgress';
 import FoodList from './FoodList';
@@ -6,6 +7,7 @@ import axios from 'axios';
 import './styles/Dashboard.css';
 
 const Dashboard = ({ userId }) => {
+  const navigate = useNavigate();
   const [dailyCalories, setDailyCalories] = useState(0);
   const [monthlyExpenditure, setMonthlyExpenditure] = useState(0);
   const [averageDailyCalories, setAverageDailyCalories] = useState(0);
@@ -20,56 +22,72 @@ const Dashboard = ({ userId }) => {
   const dailyCaloriesExceeded = dailyCalories > CALORIES_LIMIT;
   const monthlyExpenditureExceeded = monthlyExpenditure > SPENDING_LIMIT;
 
+  // Function to get token from storage
+  const getToken = () => {
+    const tokenData = localStorage.getItem('jwtToken');
+    if (!tokenData) {
+      navigate('/login');
+      return null;
+    }
+
+    try {
+      const { value, timestamp, expiresIn } = JSON.parse(tokenData);
+      const now = new Date().getTime();
+      
+      if (now - timestamp > expiresIn) {
+        // Token has expired
+        localStorage.removeItem('jwtToken');
+        navigate('/login');
+        return null;
+      }
+      
+      return value;
+    } catch (error) {
+      localStorage.removeItem('jwtToken');
+      navigate('/login');
+      return null;
+    }
+  };
+
   useEffect(() => {
     const fetchDashboardData = async () => {
+      const token = getToken();
+      if (!token) return;
+
       const today = new Date();
       const currentYear = today.getFullYear();
-      const currentMonth = today.getMonth() + 1; // Months are zero-indexed
-      const currentWeek = Math.ceil(
-        (today.getDate() - today.getDay() + 7) / 7
-      );
+      const currentMonth = today.getMonth() + 1;
+      const currentWeek = Math.ceil((today.getDate() - today.getDay() + 7) / 7);
 
       today.setHours(0, 0, 0, 0);
-
       const timezoneOffset = today.getTimezoneOffset();
-
       today.setMinutes(today.getMinutes() - timezoneOffset);
-
       const dateParam = today.toISOString().split('T')[0] + 'T00:00:00';
 
       try {
-        const token = localStorage.getItem('jwtToken');
-        const dailyCaloriesResponse = await axios.get(
+        // Create axios instance with token
+        const axiosWithAuth = axios.create({
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        // Fetch daily calories
+        const dailyCaloriesResponse = await axiosWithAuth.get(
           `http://localhost:8080/api/food-entries/calories/daily`,
-          {
-            params: { date: dateParam },
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          }
+          { params: { date: dateParam } }
         );
         setDailyCalories(dailyCaloriesResponse.data || 0);
 
-        const monthlySpendingResponse = await axios.get(
+        // Fetch monthly spending
+        const monthlySpendingResponse = await axiosWithAuth.get(
           `http://localhost:8080/api/food-entries/spending/monthly`,
-          {
-            params: { year: currentYear, month: currentMonth },
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          }
+          { params: { year: currentYear, month: currentMonth } }
         );
         setMonthlyExpenditure(monthlySpendingResponse.data || 0);
 
         // Fetch weekly spending
-        const weeklyResponse = await axios.get(
+        const weeklyResponse = await axiosWithAuth.get(
           `http://localhost:8080/api/food-entries/history`,
-          {
-            params: { range: 'week', year: currentYear, week: currentWeek },
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          }
+          { params: { range: 'week', year: currentYear, week: currentWeek } }
         );
         const weeklySpending = weeklyResponse.data.entries.reduce(
           (sum, entry) => sum + entry.price,
@@ -77,24 +95,21 @@ const Dashboard = ({ userId }) => {
         );
         setWeeklySpending(weeklySpending);
 
-        // Fetch all-time entries for average daily calories
-        const allEntriesResponse = await axios.get(
+        // Fetch all-time entries
+        const allEntriesResponse = await axiosWithAuth.get(
           `http://localhost:8080/api/food-entries/history`,
-          {
-            params: { range: 'all' },
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          }
+          { params: { range: 'all' } }
         );
+        
         const totalCalories = allEntriesResponse.data.entries.reduce(
           (sum, entry) => sum + entry.calories,
           0
         );
+        
         const activeDays = allEntriesResponse.data.entries.reduce(
           (acc, entry) => {
-            const date = entry.dateTime.split('T')[0]; // Extract date part
-            acc.add(date); // Use a Set to store unique dates
+            const date = entry.dateTime.split('T')[0];
+            acc.add(date);
             return acc;
           },
           new Set()
@@ -103,22 +118,26 @@ const Dashboard = ({ userId }) => {
         setAverageDailyCalories(activeDays > 0 ? totalCalories / activeDays : 0);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
+        if (error.response?.status === 401) {
+          // Token is invalid or expired
+          localStorage.removeItem('jwtToken');
+          navigate('/login');
+        }
       }
     };
 
     fetchDashboardData();
-  }, [userId]);
+  }, [userId, navigate]);
 
   const updateStatsAfterDeletion = async (deletedEntry) => {
-    // Recalculate stats after the deletion of an entry
+    const token = getToken();
+    if (!token) return;
+
     setDailyCalories((prev) => prev - deletedEntry.calories);
     setMonthlyExpenditure((prev) => prev - deletedEntry.price);
     setWeeklySpending((prev) => prev - deletedEntry.price);
   
     try {
-      const token = localStorage.getItem('jwtToken');
-      
-      // Refetch all-time entries after deletion
       const allEntriesResponse = await axios.get(
         `http://localhost:8080/api/food-entries/history`,
         {
@@ -129,7 +148,6 @@ const Dashboard = ({ userId }) => {
         }
       );
   
-      // Calculate total calories and active days
       const totalCalories = allEntriesResponse.data.entries.reduce(
         (sum, entry) => sum + entry.calories,
         0
@@ -137,15 +155,18 @@ const Dashboard = ({ userId }) => {
   
       const activeDays = new Set();
       allEntriesResponse.data.entries.forEach((entry) => {
-        const date = entry.dateTime.split('T')[0]; // Extract date part
+        const date = entry.dateTime.split('T')[0];
         activeDays.add(date);
       });
   
       const newAverageCalories = activeDays.size > 0 ? totalCalories / activeDays.size : 0;
-  
       setAverageDailyCalories(newAverageCalories);
     } catch (error) {
       console.error('Error fetching all-time entries after deletion:', error);
+      if (error.response?.status === 401) {
+        localStorage.removeItem('jwtToken');
+        navigate('/login');
+      }
     }
   };
 
@@ -185,7 +206,7 @@ const Dashboard = ({ userId }) => {
                       dailyCaloriesExceeded ? 'text-danger' : ''
                     }`}
                   >
-                    {dailyCalories} / 2,500
+                    {dailyCalories} / 2500
                   </h2>
                   {dailyCaloriesExceeded && (
                     <p className="text-danger">You've exceeded your daily calorie limit!</p>
