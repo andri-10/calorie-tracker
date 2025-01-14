@@ -1,188 +1,360 @@
 import React, { useState, useEffect } from 'react';
-import './AdminDashboard.css';
 
 const AdminDashboard = () => {
-    const [stats, setStats] = useState({
-        totalUsers: 0,
-        totalEntries: 0,
-        activeToday: 0
-    });
-    const [users, setUsers] = useState([]);
-    const [selectedUserEntries, setSelectedUserEntries] = useState([]);
-    const [showEntriesModal, setShowEntriesModal] = useState(false);
-    const [selectedUserName, setSelectedUserName] = useState('');
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalEntries: 0,
+    activeToday: 0,
+    lastWeekEntries: 0,
+    weekBeforeEntries: 0,
+    averageCaloriesPerUser: 0,
+    usersOverBudget: []
+  });
+  const [users, setUsers] = useState([]);
+  const [selectedUserEntries, setSelectedUserEntries] = useState([]);
+  const [showEntriesModal, setShowEntriesModal] = useState(false);
+  const [selectedUserName, setSelectedUserName] = useState('');
+  const [editingEntry, setEditingEntry] = useState(null);
 
-    useEffect(() => {
-        fetchStats();
-        fetchUsers();
-    }, []);
+  useEffect(() => {
+    fetchStats();
+    fetchUsers();
+  }, []);
 
-    const fetchStats = async () => {
-        try {
-            const response = await fetch('http://localhost:8080/api/admin/stats', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setStats(data);
-            }
-        } catch (error) {
-            console.error('Error fetching stats:', error);
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/admin/stats', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
         }
-    };
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
 
-    const fetchUsers = async () => {
-        try {
-            const response = await fetch('http://localhost:8080/api/admin/users', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setUsers(data);
-            }
-        } catch (error) {
-            console.error('Error fetching users:', error);
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/admin/users', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
         }
-    };
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
 
-    const handleViewEntries = async (userId, userName) => {
-        try {
-            const response = await fetch(`http://localhost:8080/api/admin/users/${userId}/entries`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setSelectedUserEntries(data);
-                setSelectedUserName(userName);
-                setShowEntriesModal(true);
-            }
-        } catch (error) {
-            console.error('Error fetching user entries:', error);
+  const handleViewEntries = async (userId, userName) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/admin/users/${userId}/entries`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
         }
-    };
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedUserEntries(data);
+        setSelectedUserName(userName);
+        setShowEntriesModal(true);
+      }
+    } catch (error) {
+      console.error('Error fetching user entries:', error);
+    }
+  };
 
-    const handleDeleteUser = async (userId) => {
-        if (window.confirm('Are you sure you want to delete this user?')) {
-            try {
-                const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                if (response.ok) {
-                    setUsers(users.filter(user => user.id !== userId));
-                    fetchStats();
-                }
-            } catch (error) {
-                console.error('Error deleting user:', error);
-            }
+  const handleUpdateEntry = async (entryId, updatedData) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/admin/entries/${entryId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedData)
+      });
+      if (response.ok) {
+        setEditingEntry(null);
+        const updatedEntry = await response.json();
+        setSelectedUserEntries(entries =>
+          entries.map(entry =>
+            entry.id === entryId ? updatedEntry : entry
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error updating entry:', error);
+    }
+  };
+
+  const handleDeleteEntry = async (entryId) => {
+    if (window.confirm('Are you sure you want to delete this entry?')) {
+      try {
+        const response = await fetch(`http://localhost:8080/api/admin/entries/${entryId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+          }
+        });
+        if (response.ok) {
+          setSelectedUserEntries(entries => entries.filter(entry => entry.id !== entryId));
         }
-    };
+      } catch (error) {
+        console.error('Error deleting entry:', error);
+      }
+    }
+  };
 
-    return (
-        <div className="admin-container">
-            <div className="admin-header">
-                <h1>CalorieTracker Admin</h1>
-                <p>Manage users and their calorie entries</p>
+  const handleSaveEdit = async (entry) => {
+    const updatedData = {
+      foodName: entry.foodName,
+      calories: entry.calories,
+      price: entry.price,
+      mealType: entry.mealType,
+      description: entry.description
+    };
+    await handleUpdateEntry(entry.id, updatedData);
+  };
+
+  return (
+    <div className="container p-4">
+      <div className="text-center mb-4">
+        <h1 className="display-4 text-primary">CalorieTracker Admin Dashboard</h1>
+        <p className="lead text-muted">System Analytics and Management</p>
+      </div>
+
+      <div className="row mb-4">
+        <div className="col-md-4">
+          <div className="card text-center shadow-sm">
+            <div className="card-body">
+              <h3 className="card-title text-primary">{stats.totalUsers}</h3>
+              <p className="card-text">Total Users</p>
             </div>
-
-            <div className="admin-stats">
-                <div className="stat-card">
-                    <h3>{stats.totalUsers}</h3>
-                    <p>Total Users</p>
-                </div>
-                <div className="stat-card">
-                    <h3>{stats.totalEntries}</h3>
-                    <p>Total Entries</p>
-                </div>
-                <div className="stat-card">
-                    <h3>{stats.activeToday}</h3>
-                    <p>Active Today</p>
-                </div>
-            </div>
-
-            <div className="admin-card">
-                <table className="admin-table">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Email</th>
-                            <th>Last Active</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {users.map(user => (
-                            <tr key={user.id}>
-                                <td>{user.name}</td>
-                                <td>{user.email}</td>
-                                <td>{new Date(user.lastActive).toLocaleDateString()}</td>
-                                <td className="admin-actions">
-                                    <button
-                                        className="btn-primary"
-                                        onClick={() => handleViewEntries(user.id, user.name)}
-                                    >
-                                        View Entries
-                                    </button>
-                                    <button
-                                        className="btn-delete"
-                                        onClick={() => handleDeleteUser(user.id)}
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-            {showEntriesModal && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h2>Entries for {selectedUserName}</h2>
-                            <button
-                                className="modal-close"
-                                onClick={() => setShowEntriesModal(false)}
-                            >
-                                ×
-                            </button>
-                        </div>
-                        <div className="modal-body">
-                            <table className="entries-table">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Food</th>
-                                        <th>Calories</th>
-                                        <th>Meal Type</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {selectedUserEntries.map(entry => (
-                                        <tr key={entry.id}>
-                                            <td>{new Date(entry.date).toLocaleDateString()}</td>
-                                            <td>{entry.food}</td>
-                                            <td>{entry.calories}</td>
-                                            <td>{entry.mealType}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            )}
+          </div>
         </div>
-    );
+        <div className="col-md-4">
+          <div className="card text-center shadow-sm">
+            <div className="card-body">
+              <h3 className="card-title text-primary">{stats.averageCaloriesPerUser.toFixed(0)}</h3>
+              <p className="card-text">Avg. Calories/User (Last 7 Days)</p>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-4">
+          <div className="card text-center shadow-sm">
+            <div className="card-body">
+              <h3 className="card-title text-primary">{stats.activeToday}</h3>
+              <p className="card-text">Active Today</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="row mb-4">
+        <div className="col-md-6">
+          <div className="card shadow-sm">
+            <div className="card-body">
+              <h5 className="card-title">Users Over Monthly Budget</h5>
+              {stats.usersOverBudget.length > 0 ? (
+                <ul className="list-group">
+                  {stats.usersOverBudget.map(user => (
+                    <li key={user.id} className="list-group-item d-flex justify-content-between">
+                      <span>{user.name}</span>
+                      <span className="text-danger">${user.totalSpent}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="alert alert-info">No Users Over Budget</div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="col-md-6">
+          <div className="card shadow-sm">
+            <div className="card-body">
+              <h5 className="card-title">User Management</h5>
+              <table className="table table-striped">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map(user => (
+                    <tr key={user.id}>
+                      <td>{user.name}</td>
+                      <td>{user.email}</td>
+                      <td>{user.role}</td>
+                      <td>
+                        <button
+                          onClick={() => handleViewEntries(user.id, user.name)}
+                          className="btn btn-primary btn-sm"
+                        >
+                          View Entries
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {showEntriesModal && (
+        <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1" role="dialog">
+          <div className="modal-dialog modal-lg" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Entries for {selectedUserName}</h5>
+                <button
+                  type="button"
+                  className="close"
+                  onClick={() => setShowEntriesModal(false)}
+                  aria-label="Close"
+                >
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <table className="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Food</th>
+                      <th>Calories</th>
+                      <th>Price</th>
+                      <th>Meal Type</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedUserEntries.map(entry => (
+                      <tr key={entry.id}>
+                        {editingEntry?.id === entry.id ? (
+                          <>
+                            <td>{new Date(entry.dateTime).toLocaleDateString()}</td>
+                            <td>
+                              <input
+                                type="text"
+                                value={editingEntry.foodName}
+                                onChange={e => setEditingEntry({
+                                  ...editingEntry,
+                                  foodName: e.target.value
+                                })}
+                                className="form-control"
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="number"
+                                value={editingEntry.calories}
+                                onChange={e => setEditingEntry({
+                                  ...editingEntry,
+                                  calories: parseInt(e.target.value)
+                                })}
+                                className="form-control"
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="number"
+                                step="0.01"
+                                value={editingEntry.price}
+                                onChange={e => setEditingEntry({
+                                  ...editingEntry,
+                                  price: parseFloat(e.target.value)
+                                })}
+                                className="form-control"
+                              />
+                            </td>
+                            <td>
+                              <select
+                                value={editingEntry.mealType}
+                                onChange={e => setEditingEntry({
+                                  ...editingEntry,
+                                  mealType: e.target.value
+                                })}
+                                className="form-control"
+                              >
+                                <option value="Breakfast">Breakfast</option>
+                                <option value="Lunch">Lunch</option>
+                                <option value="Dinner">Dinner</option>
+                                <option value="Snack">Snack</option>
+                              </select>
+                            </td>
+                            <td>
+                              <button
+                                onClick={() => handleSaveEdit(editingEntry)}
+                                className="btn btn-success btn-sm"
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={() => setEditingEntry(null)}
+                                className="btn btn-secondary btn-sm ms-2"
+                              >
+                                Cancel
+                              </button>
+                            </td>
+                          </>
+                        ) : (
+                          <>
+                            <td>{new Date(entry.dateTime).toLocaleDateString()}</td>
+                            <td>{entry.foodName}</td>
+                            <td>{entry.calories}</td>
+                            <td>${entry.price.toFixed(2)}</td>
+                            <td>{entry.mealType}</td>
+                            <td>
+                              <button
+                                onClick={() => setEditingEntry(entry)}
+                                className="btn btn-warning btn-sm"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteEntry(entry.id)}
+                                className="btn btn-danger btn-sm ms-2"
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          </>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowEntriesModal(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default AdminDashboard;

@@ -13,14 +13,14 @@ function App() {
   return (
     <div className="App">
       <Routes>
-        {/* Public routes */}
+        
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/reset" element={<Reset />} />
         <Route path="/admin" element={<AdminDashboard />} />
 
-        {/* Protected routes - you might want to add authentication checking later */}
+       
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/add-food" element={<AddFoodEntry />} />
         <Route path="/dashboard/history" element={<History />} />
