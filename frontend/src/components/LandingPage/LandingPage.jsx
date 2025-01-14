@@ -17,9 +17,7 @@ const LandingPage = () => {
   return (
     <div
       className="landing-container fade-in-animation"
-      style={{
-        backgroundImage: `url(${bgImage})`,
-      }}
+      
     >
       <div className="landing-content">
         <div className="content-wrapper">

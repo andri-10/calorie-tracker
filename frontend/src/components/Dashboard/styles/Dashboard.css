@@ -1,9 +1,9 @@
+
+
 .monthly-spending, .today-calories{
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
-.monthly-spending h2{
-    margin: 0 0 16px
-}
+

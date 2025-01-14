@@ -317,65 +317,70 @@ if (startDate && endDate) {
 
             {filteredEntries.length > 0 ? (
               <div className="entries-container">
-                {Object.entries(groupedEntries).map(([date, entries]) => (
-                  <div key={date} className="card shadow-sm mb-3 history-entry">
-                    <div className="card-header">
-                      <h5 className="mb-0">{date}</h5>
-                    </div>
-                    <div className="card-body">
-                      <table className="table table-hover mb-0">
-                        <thead>
-                          <tr>
-                            <th>Time</th>
-                            <th>Food Item</th>
-                            <th>Meal Type</th>
-                            <th>Calories (kcal)</th>
-                            <th>Price (€)</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {entries.map((entry) => (
-                            <React.Fragment key={entry.id}>
-                              <tr
-                                className="clickable-row"
-                                onClick={() => toggleAccordion(entry.id)}
-                              >
-                                <td>{new Date(entry.dateTime).toLocaleTimeString('en-US', { 
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}</td>
-                                <td>{entry.foodName}</td>
-                                <td>{entry.mealType}</td>
-                                <td>{entry.calories}</td>
-                                <td>{entry.price.toFixed(2)}</td>
-                              </tr>
-                              {expandedEntry === entry.id && (
-                                <tr>
-                                  <td colSpan="5" className="bg-light">
-                                    <strong>Description:</strong> {entry.description || 'No description provided.'}
-                                  </td>
+                {Object.entries(groupedEntries).map(([date, entries]) => {
+  
+                  const dailyTotalCalories = entries.reduce((total, entry) => total + entry.calories, 0);
+                  const totalRowColor = dailyTotalCalories > 2500 ? "rgb(255 238 240)" : "";
+                  return (
+                    <div key={date} className="card shadow-sm mb-3 history-entry">
+                      <div className={`card-header ${dailyTotalCalories > 2500 ? 'bg-danger text-white' : ''}`}>
+                        <h5 className="mb-0">{date}</h5>
+                        <h5 className="mb-0">{dailyTotalCalories} kcal</h5>
+                      </div>
+                      <div className="card-body">
+                        <table className="table table-hover mb-0">
+                          <thead>
+                            <tr>
+                              <th>Time</th>
+                              <th>Food Item</th>
+                              <th>Meal Type</th>
+                              <th>Calories (kcal)</th>
+                              <th>Price (€)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {entries.map((entry) => (
+                              <React.Fragment key={entry.id}>
+                                <tr
+                                  className="clickable-row"
+                                  onClick={() => toggleAccordion(entry.id)}
+                                >
+                                  <td>{new Date(entry.dateTime).toLocaleTimeString('en-US', { 
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}</td>
+                                  <td>{entry.foodName}</td>
+                                  <td>{entry.mealType}</td>
+                                  <td>{entry.calories}</td>
+                                  <td>{entry.price.toFixed(2)}</td>
                                 </tr>
-                              )}
-                            </React.Fragment>
-                          ))}
-                          <tr className="table-light">
-                            <td colSpan="3" className="text-end fw-bold">Daily Total:</td>
-                            <td className="fw-bold text-primary">
-                              {entries.reduce((total, entry) => total + entry.calories, 0)}
-                            </td>
-                            <td className="fw-bold text-primary">
-                              {entries.reduce((total, entry) => total + entry.price, 0).toFixed(2)}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
+                                {expandedEntry === entry.id && (
+                                  <tr>
+                                    <td colSpan="5" className="bg-light">
+                                      <strong>Description:</strong> {entry.description || 'No description provided.'}
+                                    </td>
+                                  </tr>
+                                )}
+                              </React.Fragment>
+                            ))}
+                            <tr>
+                              <td colSpan="3" className="text-end fw-bold" style={{backgroundColor: `${totalRowColor}`}}>Daily Total:</td>
+                              <td className="fw-bold" style={{backgroundColor: `${totalRowColor}`}}>{dailyTotalCalories}</td>
+                              <td className="fw-bold" style={{backgroundColor: `${totalRowColor}`}}>
+                                {entries.reduce((total, entry) => total + entry.price, 0).toFixed(2)}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
+
                 {dateRange !== 'day' && (
-                  <div className="mt-3 text-center">
+                  <div className="mt-3 mb-4 text-center">
                     <strong>Total Calories: 
-                    <span className="text-primary"> {totalCalories} kcal</span></strong>
+                    <span className="text-dark"> {totalCalories} kcal</span></strong>
                   </div>
                 )}
               </div>

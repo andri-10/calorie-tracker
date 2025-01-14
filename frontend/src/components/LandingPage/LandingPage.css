@@ -7,6 +7,7 @@
   animation: backgroundZoom 3s ease-in-out forwards;
 }
 
+
 @keyframes backgroundZoom {
   0% {
     background-size: 120%;

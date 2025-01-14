@@ -1,8 +1,11 @@
-/* History.css */
 
-/* General styles */
+html{
+  background-color: #f8f9fa;
+}
+
 body {
   font-family: 'Arial', sans-serif;
+  
 }
 
 .min-vh-100 {
@@ -102,6 +105,8 @@ h2.text-center {
   font-size: 1.1rem;
   font-weight: bold;
   color: #555;
+  display:flex;
+  justify-content: space-between;
 }
 
 .history-entry .card-body {
@@ -152,7 +157,7 @@ h2.text-center {
   font-size: 1rem;
 }
 
-/* Total calories display */
+
 .mt-3 {
   margin-top: 1rem !important;
 }
@@ -163,4 +168,8 @@ h2.text-center {
 
 .mt-3 .text-primary {
   font-weight: bold;
+}
+
+.text-end.fw-bold{
+  text-align: left !important;
 }
