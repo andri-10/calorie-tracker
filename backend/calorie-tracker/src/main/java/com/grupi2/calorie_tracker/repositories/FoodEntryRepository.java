@@ -9,12 +9,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public interface FoodEntryRepository extends JpaRepository<FoodEntry, Long> {
     List<FoodEntry> findByUserIdOrderByDateTimeDesc(Long userId);
     List<FoodEntry> findByUserIdAndDateTimeBetweenOrderByDateTimeDesc(
             Long userId, LocalDateTime start, LocalDateTime end);
-
+    Optional<FoodEntry> findByIdAndUserId(Long foodEntryId, Long userId);
     @Query("SELECT SUM(f.calories) FROM FoodEntry f WHERE f.user.id = ?1 AND f.dateTime BETWEEN ?2 AND ?3")
     Integer getTotalCaloriesForUserBetweenDates(Long userId, LocalDateTime start, LocalDateTime end);
 

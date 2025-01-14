@@ -60,8 +60,8 @@ public class FoodEntry {
 
 
     @Transient
-    @JsonInclude(JsonInclude.Include.NON_NULL)  // Include only if not null
-    @JsonProperty("formattedTime")             // Explicitly name the JSON key
+    @JsonInclude(JsonInclude.Include.NON_NULL)  
+    @JsonProperty("formattedTime")             
     public String getFormattedTime() {
         if (dateTime == null) return null;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
@@ -74,11 +74,11 @@ public class FoodEntry {
     }
 
     public int getMonth() {
-        return dateTime.getMonthValue(); // Returns month as an integer (1 to 12)
+        return dateTime.getMonthValue(); 
     }
 
     public int getWeek() {
         WeekFields weekFields = WeekFields.of(Locale.getDefault());
-        return dateTime.get(weekFields.weekOfYear());  // Get the week of the year
+        return dateTime.get(weekFields.weekOfYear());  
     }
 }

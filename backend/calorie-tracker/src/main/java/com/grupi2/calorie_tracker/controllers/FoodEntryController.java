@@ -17,11 +17,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/food-entries")
-//@RequiredArgsConstructor
+
+
 public class FoodEntryController {
 
     private final FoodEntryService foodEntryService;
@@ -46,6 +48,22 @@ public class FoodEntryController {
         Long userId = ((CustomUserDetails) userDetails).getId();
         List<FoodEntry> entries = foodEntryService.getUserFoodEntriesForDay(userId, date);
         return ResponseEntity.ok(entries);
+    }
+
+    @DeleteMapping("/{foodEntryId}")
+    public ResponseEntity<Void> deleteFoodEntry(
+            @PathVariable Long foodEntryId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = ((CustomUserDetails) userDetails).getId();
+        boolean isDeleted = foodEntryService.deleteFoodEntry(userId, foodEntryId);
+
+        if (isDeleted) {
+            return ResponseEntity.noContent().build();  
+
+        } else {
+            return ResponseEntity.notFound().build();  
+
+        }
     }
 
     @GetMapping("/calories/daily")
@@ -84,54 +102,72 @@ public class FoodEntryController {
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer week,
             @RequestParam(required = false) Integer day,
+            @RequestParam(required = false) String startDate,  
+
+            @RequestParam(required = false) String endDate,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         Long userId = ((CustomUserDetails) userDetails).getId();
 
-        // Initialize a list to hold food entries
+        
+
         List<FoodEntry> entries;
 
-        // Handle different ranges and query accordingly
+        
+
         if (range.equals("day")) {
-            // Ensure year, month, and day are provided for the "day" range
             if (year == null || month == null || day == null) {
                 return ResponseEntity.badRequest().body("Year, month, and day are required for the 'day' range.");
             }
 
-            // Convert to LocalDateTime and fetch food entries for the specific day
             LocalDate date = LocalDate.of(year, Month.of(month), day);
             entries = foodEntryService.getUserFoodEntriesForDay(userId, date.atStartOfDay());
 
         } else if (range.equals("week")) {
-            // Ensure year and week are provided for the "week" range
             if (year == null || week == null) {
                 return ResponseEntity.badRequest().body("Year and week are required for the 'week' range.");
             }
 
-            // Fetch food entries for the specified week and year
             entries = foodEntryService.getUserFoodEntriesForWeek(userId, year, week);
 
         } else if (range.equals("month")) {
-            // Ensure year and month are provided for the "month" range
             if (year == null || month == null) {
                 return ResponseEntity.badRequest().body("Year and month are required for the 'month' range.");
             }
 
-            // Fetch food entries for the specified month and year
             entries = foodEntryService.getUserFoodEntriesForMonth(userId, year, month);
 
         } else if (range.equals("all")) {
-            // No additional parameters needed for "all time" range
-            entries = foodEntryService.getUserFoodEntriesForAllTime(userId);  // Fetch all-time entries
+            
+
+            if (startDate != null && endDate != null) {
+                try {
+                    
+
+                    LocalDate start = LocalDate.parse(startDate);
+                    LocalDate end = LocalDate.parse(endDate);
+                    entries = foodEntryService.getUserFoodEntriesForAllTimeWithinRange(userId, start.atStartOfDay(), end.atTime(23, 59, 59));
+                    System.out.println("StartDate: " + startDate + ", EndDate: " + endDate);
+                } catch (DateTimeParseException e) {
+                    return ResponseEntity.badRequest().body("Invalid date format. Please use 'YYYY-MM-DD'.");
+                }
+            } else {
+                
+
+                entries = foodEntryService.getUserFoodEntriesForAllTime(userId);
+            }
 
         } else {
             return ResponseEntity.badRequest().body("Invalid range parameter.");
         }
 
-        // Calculate total calories from the entries
+        
+
         int totalCalories = entries.stream().mapToInt(FoodEntry::getCalories).sum();
 
-        // Return the response with the filtered entries and total calories
+        
+
         return ResponseEntity.ok(new HistoryResponse(entries, totalCalories));
     }
+
 }

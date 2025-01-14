@@ -8,13 +8,13 @@ public class HistoryResponse {
     private List<FoodEntry> entries;
     private int totalCalories;
 
-    // Constructor
+    
     public HistoryResponse(List<FoodEntry> entries, int totalCalories) {
         this.entries = entries;
         this.totalCalories = totalCalories;
     }
 
-    // Getters and Setters
+    
     public List<FoodEntry> getEntries() {
         return entries;
     }

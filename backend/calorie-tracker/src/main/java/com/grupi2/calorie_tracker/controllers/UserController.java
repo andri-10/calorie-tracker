@@ -30,32 +30,32 @@ public class UserController {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private AuthenticationManager authenticationManager;  // Autowire AuthenticationManager
+    private AuthenticationManager authenticationManager;  
 
-    // Endpoint to register a new user
+    
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         try {
-            // Ensure role is set to USER if not provided
+            
             if (user.getRole() == null) {
                 user.setRole(User.Role.USER);
             }
 
-            // Encode the user's password before saving
+            
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-            // Register the user in the system
+            
             User registeredUser = userService.registerUser(user);
 
-            // Generate JWT for the newly registered user
+            
             String jwt = jwtUtils.generateToken(registeredUser.getEmail());
 
-            // Prepare response body
+            
             Map<String, Object> response = new HashMap<>();
             response.put("user", registeredUser);
-            response.put("token", jwt);  // Include the token in the response body
+            response.put("token", jwt);  
 
-            return ResponseEntity.ok(response);  // Return the token in the body
+            return ResponseEntity.ok(response);  
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -63,23 +63,23 @@ public class UserController {
         }
     }
 
-    // Endpoint to login an existing user
+    
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody User loginUser) {
         try {
-            // Authenticate the user
+            
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginUser.getEmail(), loginUser.getPassword())
             );
 
-            // Generate JWT for the authenticated user
+            
             String jwt = jwtUtils.generateToken(loginUser.getEmail());
             User user = userService.findByEmail(loginUser.getEmail());
 
-            // Prepare response body with token and user data
+            
             Map<String, Object> response = new HashMap<>();
             response.put("token", jwt);
-            response.put("user", user); // include user info if necessary
+            response.put("user", user); 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             System.out.println("Authentication failed for user: " + loginUser.getEmail());
@@ -87,7 +87,7 @@ public class UserController {
         }
     }
 
-    // Add logout endpoint
+    
     @PostMapping("/logout")
     public ResponseEntity<?> logoutUser() {
         return ResponseEntity.ok().body("Logged out successfully");

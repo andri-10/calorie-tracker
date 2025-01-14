@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const FoodList = () => {
+const FoodList = ({ updateStatsAfterDeletion }) => { 
   const [foodEntries, setFoodEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -8,21 +8,13 @@ const FoodList = () => {
   useEffect(() => {
     const fetchFoodEntries = async () => {
       try {
-        // Get today's date in the local timezone
         const today = new Date();
+        today.setHours(0, 0, 0, 0); // Set to midnight
 
-        // Adjust the date to local midnight (00:00:00) by setting hours, minutes, seconds, and milliseconds to 0
-        today.setHours(0, 0, 0, 0); 
-
-        // Get the offset in minutes for your local time zone
         const timezoneOffset = today.getTimezoneOffset(); 
-
-        // Adjust the date to reflect the local time zone offset
         today.setMinutes(today.getMinutes() - timezoneOffset);
 
-        // Convert the adjusted date to ISO string (without milliseconds)
-        const dateParam = today.toISOString().split('.')[0];  // This will be in UTC format, but reflect the local timezone's midnight
-
+        const dateParam = today.toISOString().split('.')[0]; 
         const token = localStorage.getItem('jwtToken');
         
         const response = await fetch(`http://localhost:8080/api/food-entries/daily?date=${dateParam}`, {
@@ -33,26 +25,63 @@ const FoodList = () => {
           },
         });
 
-        const textResponse = await response.text();  // Get raw response as text
-
         if (!response.ok) {
           throw new Error('Failed to fetch food entries');
         }
 
-        const data = JSON.parse(textResponse);  // Parse the response as JSON
-        setFoodEntries(data);  // Update state with fetched data
+        const data = await response.json();
+        setFoodEntries(data);
       } catch (error) {
-        setError(error.message);  // Set error message if something fails
+        setError(error.message);
       } finally {
-        setLoading(false);  // Stop loading indicator
+        setLoading(false);
       }
     };
 
-    fetchFoodEntries();  // Call the function when component mounts
-  }, []);  // Empty dependency array means it runs only once on mount
+    fetchFoodEntries();
+  }, []); 
+
+  const deleteFoodEntry = async (foodEntryId, calories, price) => {
+    try {
+      const token = localStorage.getItem('jwtToken');
+
+      const response = await fetch(`http://localhost:8080/api/food-entries/${foodEntryId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete food entry');
+      }
+
+      // Update the stats in the parent component after deletion
+      updateStatsAfterDeletion({ calories, price });
+
+      // Remove the deleted entry from the local state
+      setFoodEntries(foodEntries.filter(entry => entry.id !== foodEntryId));
+
+    } catch (error) {
+      setError(error.message);
+    }
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
+
+  // Check if there are no food entries
+  if (foodEntries.length === 0) {
+    return (
+      <div className="card border-0 shadow-sm animate-fade-in">
+        <div className="card-body">
+          <h5 className="card-title text-primary fw-bold mb-4">Today's Entries</h5>
+          <p>No entries for today</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="card border-0 shadow-sm animate-fade-in">
@@ -77,7 +106,10 @@ const FoodList = () => {
                   <td>{entry.calories}</td>
                   <td>€{entry.price}</td>
                   <td>
-                    <button className="btn btn-outline-danger btn-sm">
+                    <button 
+                      className="btn btn-outline-danger btn-sm"
+                      onClick={() => deleteFoodEntry(entry.id, entry.calories, entry.price)} 
+                    >
                       Delete
                     </button>
                   </td>

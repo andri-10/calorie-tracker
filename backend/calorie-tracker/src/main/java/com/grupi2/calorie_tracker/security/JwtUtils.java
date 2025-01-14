@@ -12,7 +12,7 @@ import java.util.Date;
 @Component
 public class JwtUtils {
 
-    private static final long JWT_EXPIRATION = 86400000; // 24 hours
+    private static final long JWT_EXPIRATION = 86400000; 
     private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     public String generateToken(String email) {
