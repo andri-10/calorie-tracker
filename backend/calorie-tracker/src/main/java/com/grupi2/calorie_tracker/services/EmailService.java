@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
+
     @Autowired
     private JavaMailSender mailSender;
 
@@ -15,7 +16,13 @@ public class EmailService {
         message.setTo(to);
         message.setSubject(subject);
         message.setText(text);
-        mailSender.send(message);
+
+        try {
+            mailSender.send(message);
+            System.out.println("Email sent successfully to: " + to);
+        } catch (Exception e) {
+            System.out.println("Failed to send email to: " + to + ", Error: " + e.getMessage());
+            e.printStackTrace(); // If you want to print stack trace to console as well
+        }
     }
 }
-
