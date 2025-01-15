@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalEntries: 0,
@@ -17,96 +21,118 @@ const AdminDashboard = () => {
   const [editingEntry, setEditingEntry] = useState(null);
 
   useEffect(() => {
+    checkAdminRights();
     fetchStats();
     fetchUsers();
   }, []);
 
+  const checkAdminRights = () => {
+    const tokenData = localStorage.getItem('jwtToken');
+      
+    if (!tokenData) {
+      navigate('/404');
+      return;
+    }
+  
+    try {
+      const { value, timestamp, expiresIn } = JSON.parse(tokenData);
+      const now = new Date().getTime();
+  
+      if (now - timestamp > expiresIn) {
+        localStorage.removeItem('jwtToken');
+        navigate('/404');
+        return;
+      }
+  
+      const decodedToken = jwtDecode(value);
+      if (decodedToken.role !== 'ADMIN') {
+        navigate('/404');
+      }
+    } catch (error) {
+      console.error('Error verifying admin access:', error);
+      navigate('/404');
+    }
+  };
+
+
+  const getAxiosConfig = () => {
+    const tokenData = localStorage.getItem('jwtToken');
+    if (!tokenData) return {};
+    
+    const { value } = JSON.parse(tokenData);
+    return {
+      headers: {
+        'Authorization': `Bearer ${value}`,
+      }
+    };
+  };
+
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/admin/stats', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      }
+      const response = await axios.get(
+        'http://localhost:8080/api/admin/stats',
+        getAxiosConfig()
+      );
+      setStats(response.data);
     } catch (error) {
       console.error('Error fetching stats:', error);
     }
   };
-
+  
   const fetchUsers = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/admin/users', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data);
-      }
+      const response = await axios.get(
+        'http://localhost:8080/api/admin/users',
+        getAxiosConfig()
+      );
+      setUsers(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
     }
   };
-
+  
   const handleViewEntries = async (userId, userName) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/admin/users/${userId}/entries`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setSelectedUserEntries(data);
-        setSelectedUserName(userName);
-        setShowEntriesModal(true);
-      }
+      const response = await axios.get(
+        `http://localhost:8080/api/admin/users/${userId}/entries`,
+        getAxiosConfig()
+      );
+      setSelectedUserEntries(response.data);
+      setSelectedUserName(userName);
+      setShowEntriesModal(true);
     } catch (error) {
       console.error('Error fetching user entries:', error);
     }
   };
-
+  
   const handleUpdateEntry = async (entryId, updatedData) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/admin/entries/${entryId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updatedData)
-      });
-      if (response.ok) {
-        setEditingEntry(null);
-        const updatedEntry = await response.json();
-        setSelectedUserEntries(entries =>
-          entries.map(entry =>
-            entry.id === entryId ? updatedEntry : entry
-          )
-        );
-      }
+      const response = await axios.put(
+        `http://localhost:8080/api/admin/entries/${entryId}`,
+        updatedData,
+        getAxiosConfig()
+      );
+      setEditingEntry(null);
+      setSelectedUserEntries(entries =>
+        entries.map(entry =>
+          entry.id === entryId ? response.data : entry
+        )
+      );
     } catch (error) {
       console.error('Error updating entry:', error);
     }
   };
-
+  
   const handleDeleteEntry = async (entryId) => {
     if (window.confirm('Are you sure you want to delete this entry?')) {
       try {
-        const response = await fetch(`http://localhost:8080/api/admin/entries/${entryId}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
-          }
-        });
-        if (response.ok) {
-          setSelectedUserEntries(entries => entries.filter(entry => entry.id !== entryId));
-        }
+        await axios.delete(
+          `http://localhost:8080/api/admin/entries/${entryId}`,
+          getAxiosConfig()
+        );
+        setSelectedUserEntries(entries => 
+          entries.filter(entry => entry.id !== entryId)
+        );
       } catch (error) {
         console.error('Error deleting entry:', error);
       }

@@ -16,7 +16,6 @@ const Login = () => {
   const [isShaking, setIsShaking] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Check if user is already logged in
   useEffect(() => {
     const checkAuthStatus = () => {
       const tokenData = localStorage.getItem('jwtToken');

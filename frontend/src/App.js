@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { checkTokenValidity } from './components/utils/tokenUtils';
+
 import Login from './components/Login/login';
 import Reset from './components/Login/reset';
 import Register from './components/Register/register';
@@ -9,7 +10,8 @@ import Dashboard from './components/Dashboard/Dashboard';
 import AddFoodEntry from './components/Dashboard/AddFoodEntry';
 import History from './components/Dashboard/History';
 import AdminDashboard from './components/Admin/AdminDashboard';
-
+import NotFoundPage from './components/NotFoundPage';
+import AdminRoute from './components/utils/AdminRoute';
 
 const ProtectedRoute = ({ element }) => {
   const location = useLocation();
@@ -23,7 +25,7 @@ const ProtectedRoute = ({ element }) => {
   return element;
 };
 
-const publicRoutes = ['/', '/login', '/register', '/reset'];
+const publicRoutes = ['/', '/login', '/register', '/reset', '/404'];
 
 function App() {
   const location = useLocation();
@@ -50,7 +52,6 @@ function App() {
     checkAuth();
   }, [location, navigate]);
 
-
   if (!isInitialized) {
     return null;
   }
@@ -58,16 +59,19 @@ function App() {
   return (
     <div className="App">
       <Routes>
-
+        {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/reset" element={<Reset />} />
+        <Route path="/404" element={<NotFoundPage />} />
 
+        {/* Admin Routes */}
+        <Route element={<AdminRoute />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Route>
 
-        <Route path="/admin" element={
-          <ProtectedRoute element={<AdminDashboard />} />
-        } />
+        {/* Protected Routes */}
         <Route path="/dashboard" element={
           <ProtectedRoute element={<Dashboard />} />
         } />
@@ -78,7 +82,8 @@ function App() {
           <ProtectedRoute element={<History />} />
         } />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Catch all route */}
+        <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
     </div>
   );
