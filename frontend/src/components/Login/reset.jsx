@@ -15,7 +15,8 @@ const Reset = () => {
   const [smsColor, setSmsColor] = useState('');
   const [loading, setLoading] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
-  const [step, setStep] = useState(1); // 1: email, 2: confirmation code, 3: new password
+  const [step, setStep] = useState(1); 
+  const [showPassword, setShowPassword] = useState(false);
 
   const triggerShake = () => {
     setIsShaking(true);
@@ -154,7 +155,7 @@ const Reset = () => {
             <>
               <Form.Group className="mb-3">
                 <Form.Control
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="Enter new password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
@@ -163,11 +164,19 @@ const Reset = () => {
               </Form.Group>
               <Form.Group className="mb-3">
                 <Form.Control
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="Confirm new password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
+                />
+              </Form.Group>
+              <Form.Group className="mb-3 d-flex align-items-center">
+                <Form.Check
+                  type="checkbox"
+                  label="Show password"
+                  checked={showPassword}
+                  onChange={() => setShowPassword(!showPassword)}
                 />
               </Form.Group>
             </>

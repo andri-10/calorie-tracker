@@ -130,10 +130,11 @@ public class UserController {
                         .body(Map.of("message", "New password is required"));
             }
 
-            // Validate password strength
-            if (request.getNewPassword().length() < 8) {
+            // Validate password strength with regex
+            String passwordPattern = "^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?\":{}|<>])[A-Za-z\\d!@#$%^&*(),.?\":{}|<>]{8,}$";
+            if (!request.getNewPassword().matches(passwordPattern)) {
                 return ResponseEntity.badRequest()
-                        .body(Map.of("message", "Password must be at least 8 characters long"));
+                        .body(Map.of("message", "Your password should have at least 8 letters, 1 capital letter, and 1 special character"));
             }
 
             // Update the password
@@ -153,6 +154,7 @@ public class UserController {
                     .body(Map.of("message", "An error occurred while updating the password"));
         }
     }
+
 }
 
 
