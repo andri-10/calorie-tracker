@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import "./AdminDashboard.css"
+import "./AdminDashboard.css";
+
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -7,7 +8,7 @@ const AdminDashboard = () => {
     activeToday: 0,
     lastWeekEntries: 0,
     weekBeforeEntries: 0,
-    averageCaloriesPerUser: 0,
+    averageCaloriesAllUsers: 0,
     usersOverBudget: []
   });
   const [users, setUsers] = useState([]);
@@ -15,10 +16,18 @@ const AdminDashboard = () => {
   const [showEntriesModal, setShowEntriesModal] = useState(false);
   const [selectedUserName, setSelectedUserName] = useState('');
   const [editingEntry, setEditingEntry] = useState(null);
+  const [userAverageCalories, setUserAverageCalories] = useState(0);
 
   useEffect(() => {
     fetchStats();
     fetchUsers();
+
+    // Set an interval to update stats in real time
+    const intervalId = setInterval(() => {
+      fetchStats();
+    }, 10000); // Update every 10 seconds
+
+    return () => clearInterval(intervalId); // Cleanup interval on unmount
   }, []);
 
   const fetchStats = async () => {
@@ -62,15 +71,38 @@ const AdminDashboard = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        setSelectedUserEntries(data);
+        setSelectedUserEntries(data); // Assuming 'data' contains the entries array
         setSelectedUserName(userName);
+  
+        // Get today's date and the date from 7 days ago
+        const today = new Date();
+        const lastWeek = new Date(today);
+        lastWeek.setDate(today.getDate() - 7);
+  
+        // Filter entries for the last 7 days
+        const recentEntries = data.filter(entry => {
+          const entryDate = new Date(entry.dateTime);
+          return entryDate >= lastWeek && entryDate <= today;
+        });
+  
+        // Calculate the total calories for the filtered entries
+        const totalCalories = recentEntries.reduce((sum, entry) => sum + entry.calories, 0);
+        
+        // Calculate the average calories for the last week
+        const averageCalories = recentEntries.length > 0 ? totalCalories / recentEntries.length : 0;
+  
+        // Directly set the average calories for the user for the last week
+        setUserAverageCalories(averageCalories);
+  
         setShowEntriesModal(true);
       }
     } catch (error) {
       console.error('Error fetching user entries:', error);
     }
   };
-
+  
+  
+  
   const handleUpdateEntry = async (entryId, updatedData) => {
     try {
       const response = await fetch(`http://localhost:8080/api/admin/entries/${entryId}`, {
@@ -89,6 +121,9 @@ const AdminDashboard = () => {
             entry.id === entryId ? updatedEntry : entry
           )
         );
+
+        await fetchStats();
+
       }
     } catch (error) {
       console.error('Error updating entry:', error);
@@ -105,7 +140,11 @@ const AdminDashboard = () => {
           }
         });
         if (response.ok) {
+          // Remove the entry from the local state
           setSelectedUserEntries(entries => entries.filter(entry => entry.id !== entryId));
+
+          // Fetch updated stats to reflect the change
+          await fetchStats();
         }
       } catch (error) {
         console.error('Error deleting entry:', error);
@@ -132,23 +171,23 @@ const AdminDashboard = () => {
       </div>
 
       <div className="row mb-4">
-        <div className="col-md-4">
+        <div className="col-lg-4 mb-2">
           <div className="card text-center shadow-sm">
-            <div className="card-body">
+            <div className="card-body ">
               <h3 className="card-title text-primary">{stats.totalUsers}</h3>
               <p className="card-text">Total Users</p>
             </div>
           </div>
         </div>
-        <div className="col-md-4">
+        <div className="col-lg-4 mb-2">
           <div className="card text-center shadow-sm">
-            <div className="card-body">
-              <h3 className="card-title text-primary">{stats.averageCaloriesPerUser.toFixed(0)}</h3>
+            <div className="card-body ">
+              <h3 className="card-title text-primary">{stats.averageCaloriesAllUsers.toFixed(0)}</h3>
               <p className="card-text">Avg. Calories/User (Last 7 Days)</p>
             </div>
           </div>
         </div>
-        <div className="col-md-4">
+        <div className="col-lg-4 mb-2">
           <div className="card text-center shadow-sm">
             <div className="card-body">
               <h3 className="card-title text-primary">{stats.activeToday}</h3>
@@ -157,9 +196,23 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
+      
+      <div className="row mb-4">
+        <div>
+            <div className="card text-center shadow-sm">
+              <div className="card-body ">
+                <p>Entries this week: <span className='text-primary fw-bold'>{stats.lastWeekEntries}</span></p>
+                <p>Entries last week: <span className='text-primary fw-bold'>{stats.weekBeforeEntries}</span></p>
+              </div>
+        </div>
+          
+        </div>
+
+      </div>
+
 
       <div className="row mb-4">
-        <div className="col-xl-6">
+        <div className="col-xl-6 mb-3">
           <div className="card shadow-sm">
             <div className="card-body">
               <h5 className="card-title">Users Over Monthly Budget</h5>
@@ -179,7 +232,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="col-xl-6">
+        <div className="col-xl-6 mb-3">
           <div className="card shadow-sm">
             <div className="card-body">
               <h5 className="card-title">User Management</h5>
@@ -224,6 +277,7 @@ const AdminDashboard = () => {
 
               </div>
               <div className="modal-body">
+                <h6>Average calories for this user last week: {userAverageCalories.toFixed(2)} kcal</h6>
                 <table className="table table-striped" id="modalTable">
                   <thead>
                     <tr>

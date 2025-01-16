@@ -13,6 +13,6 @@ public class AdminStatsResponse {
     private int activeToday;
     private int lastWeekEntries;
     private int weekBeforeEntries;
-    private double averageCaloriesPerUser;
+    private double averageCaloriesAllUsers;
     private List<UserOverBudgetDTO> usersOverBudget;
 }

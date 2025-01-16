@@ -44,7 +44,7 @@ public interface FoodEntryRepository extends JpaRepository<FoodEntry, Long> {
             @Param("year") int year,
             @Param("month") int month);
 
-    List<FoodEntry> findByUserId(Long userId);
+
 
     @Query("SELECT COUNT(DISTINCT f.user) FROM FoodEntry f WHERE f.dateTime BETWEEN :start AND :end")
     int countDistinctUsersByDateTimeBetween(
