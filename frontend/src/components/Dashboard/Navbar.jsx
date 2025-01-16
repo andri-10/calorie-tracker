@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode'; // Correct import for named export
 import headerLogo from '../../images/header-logo.png';
 
 const Navbar = () => {
@@ -8,6 +9,21 @@ const Navbar = () => {
 
   const getLinkClass = (path) =>
     `nav-link fw-medium link-primary ${location.pathname === path ? 'active' : ''}`;
+
+  // Decode the JWT token to get the user's role
+  const token = localStorage.getItem('jwtToken');
+  let userRole = null;
+
+  if (token) {
+    try {
+      const decodedToken = jwtDecode(token);
+      userRole = decodedToken.role;
+    } catch (error) {
+      console.error('Invalid token:', error);
+      localStorage.removeItem('jwtToken');
+      navigate('/');
+    }
+  }
 
   const handleLogout = (e) => {
     e.preventDefault();
@@ -33,6 +49,13 @@ const Navbar = () => {
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
+            {userRole === 'ROLE_ADMIN' && (
+              <li className="nav-item">
+                <Link className={getLinkClass('/admin')} to="/admin">
+                  Admin
+                </Link>
+              </li>
+            )}
             <li className="nav-item">
               <Link className={getLinkClass('/dashboard')} to="/dashboard">
                 Dashboard

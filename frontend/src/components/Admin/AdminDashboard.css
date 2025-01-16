@@ -14,8 +14,8 @@ text-wrap:nowrap
     z-index: 1040;
 }
 
-.container-fluid{
- min-height: 100vh
+.container.py-1{
+ max-width:97%
 }
 
 .modal-dialog {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import "./AdminDashboard.css";
-
+import Navbar from '../Dashboard/Navbar';
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -164,7 +164,9 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="container-fluid">
+    <div className="min-vh-100 p-0">
+      <Navbar />
+      <div className="container py-1 mt-4">
       <div className="text-center mb-4">
         <h1 className="display-4 text-primary">CalorieTracker Admin Dashboard</h1>
         <p className="lead text-muted">System Analytics and Management</p>
@@ -402,6 +404,7 @@ const AdminDashboard = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };
