@@ -29,7 +29,7 @@ body {
   transform: scale(1.02);
 }
 
-/* Nav links hover effect */
+
 .nav-link {
   position: relative;
   padding: 0.5rem 1rem;
@@ -63,6 +63,8 @@ body {
 .landing-container {
   
   min-height: 100vh;
+  max-height: 100vh;
+  width:100vw;
   display: flex;
   flex-direction: column;
   background: linear-gradient(135deg, #E3F2FD 0%, #90CAF9 100%);
@@ -115,7 +117,7 @@ body {
   margin-bottom: 2rem;
 }
 
-/* Button styles */
+
 .buttons-container {
   display: flex;
   gap: 1rem;
@@ -221,6 +223,7 @@ body {
   opacity: 0;
   animation: fade-in 1s ease-out forwards;
   animation-delay: 0.5s;
+  background-size: cover;
 }
 
 .slide-up-animation {

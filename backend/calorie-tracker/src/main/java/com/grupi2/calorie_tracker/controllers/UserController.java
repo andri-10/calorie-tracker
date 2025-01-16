@@ -119,7 +119,7 @@ public class UserController {
     @PostMapping("/update-password")
     public ResponseEntity<?> updatePassword(@RequestBody PasswordResetRequest request) {
         try {
-            // Validate input
+
             if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("message", "Email is required"));
@@ -130,14 +130,14 @@ public class UserController {
                         .body(Map.of("message", "New password is required"));
             }
 
-            // Validate password strength with regex
+
             String passwordPattern = "^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?\":{}|<>])[A-Za-z\\d!@#$%^&*(),.?\":{}|<>]{8,}$";
             if (!request.getNewPassword().matches(passwordPattern)) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("message", "Your password should have at least 8 letters, 1 capital letter, and 1 special character"));
             }
 
-            // Update the password
+
             userService.updatePassword(request.getEmail(), request.getNewPassword());
 
             return ResponseEntity.ok()

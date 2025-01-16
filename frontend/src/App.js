@@ -14,13 +14,13 @@ function App() {
   return (
     <div className="App">
       <Routes>
-        {/* Public routes */}
+        
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/reset" element={<Reset />} />
 
-        {/* Protected routes */}
+        
         <Route 
           path="/dashboard" 
           element={<PrivateRoute element={<Dashboard />} />} 
@@ -34,7 +34,7 @@ function App() {
           element={<PrivateRoute element={<History />} />} 
         />
 
-        {/* Admin routes */}
+        
         <Route 
           path="/admin" 
           element={<PrivateRoute element={<AdminDashboard />} requiredRole="ROLE_ADMIN" />} 
