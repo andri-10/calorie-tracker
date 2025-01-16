@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
-import axios from 'axios';
 
 const AddFoodEntry = () => {
   const [foodEntry, setFoodEntry] = useState({
@@ -9,79 +8,67 @@ const AddFoodEntry = () => {
     price: '',
     mealType: '',
     description: '',
+    dateTime: new Date().toISOString() // Set the default to the current timestamp
   });
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [token, setToken] = useState(null);
+
+  useEffect(() => {
+    // Get token when component mounts
+    const storedToken = localStorage.getItem('jwtToken');
+    setToken(storedToken);
+
+    // Debug log - remove in production
+    console.log('Token from localStorage:', storedToken);
+  }, []);
+
   const mealTypes = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'];
-
-  const getToken = () => {
-    const tokenData = localStorage.getItem('jwtToken');
-    if (!tokenData) {
-      window.location.href = '/login';
-      return null;
-    }
-
-    try {
-      const { value, timestamp, expiresIn } = JSON.parse(tokenData);
-      const now = new Date().getTime();
-
-      if (now - timestamp > expiresIn) {
-        localStorage.removeItem('jwtToken');
-        window.location.href = '/login';
-        return null;
-      }
-
-      return value;
-    } catch (error) {
-      localStorage.removeItem('jwtToken');
-      window.location.href = '/login';
-      return null;
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess(false);
 
-    const token = getToken();
-    if (!token) return;
-
     try {
-      const response = await axios.post(
-        'http://localhost:8080/api/food-entries',
-        {
-          ...foodEntry,
-          calories: parseInt(foodEntry.calories, 10),
-          price: parseFloat(foodEntry.price),
-          dateTime: new Date().toISOString(),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (response.status === 200 || response.status === 201) {
-        setSuccess(true);
-        setFoodEntry({
-          foodName: '',
-          calories: '',
-          price: '',
-          mealType: '',
-          description: '',
-        });
+      // Get token again in case it was updated
+      const currentToken = localStorage.getItem('jwtToken');
+      if (!currentToken) {
+        throw new Error('Not authenticated - No token found');
       }
-    } catch (err) {
-      setError(err.response?.data?.message || err.message || 'An error occurred.');
+
+      // Here we base the dateTime on the current system time (i.e., when the food entry is created)
+      const currentDateTime = new Date().toISOString(); // Get the current UTC time
+
+      const response = await fetch('http://localhost:8080/api/food-entries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentToken}`,
+        },
+        body: JSON.stringify({
+          foodName: foodEntry.foodName,
+          calories: parseInt(foodEntry.calories),
+          price: parseFloat(foodEntry.price),
+          mealType: foodEntry.mealType,
+          description: foodEntry.description,
+          dateTime: currentDateTime, // Send current date and time from the system (UTC)
+        }),
+      });
+
+      if (response.ok) {
+        setSuccess(true);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to add food entry.');
+      }
+    } catch (error) {
+      setError(error.message || 'An error occurred while submitting the food entry.');
     }
   };
 
-  // Initial token check
-  const token = getToken();
+  // If no token is found, show a message
   if (!token) {
     return (
       <div className="min-vh-100 bg-light p-0">
@@ -98,7 +85,7 @@ const AddFoodEntry = () => {
   return (
     <div className="min-vh-100 bg-light p-0">
       <Navbar />
-      <div className="container py-4">
+      <div className="container py-4 ">
         <div className="row justify-content-center">
           <div className="col-md-8 col-lg-6">
             <div className="card border-0 shadow-sm">
@@ -118,6 +105,7 @@ const AddFoodEntry = () => {
                 )}
 
                 <form onSubmit={handleSubmit}>
+                  {/* Rest of the form remains the same */}
                   <div className="mb-3">
                     <label className="form-label fw-medium">Food Name</label>
                     <input
@@ -170,6 +158,7 @@ const AddFoodEntry = () => {
                       min="0"
                     />
                   </div>
+
 
                   <div className="mb-3">
                     <label className="form-label fw-medium">Description (Optional)</label>

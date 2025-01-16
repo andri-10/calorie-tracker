@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
-
+import "./AdminDashboard.css"
 const AdminDashboard = () => {
-  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalEntries: 0,
@@ -21,118 +17,96 @@ const AdminDashboard = () => {
   const [editingEntry, setEditingEntry] = useState(null);
 
   useEffect(() => {
-    checkAdminRights();
     fetchStats();
     fetchUsers();
   }, []);
 
-  const checkAdminRights = () => {
-    const tokenData = localStorage.getItem('jwtToken');
-      
-    if (!tokenData) {
-      navigate('/404');
-      return;
-    }
-  
-    try {
-      const { value, timestamp, expiresIn } = JSON.parse(tokenData);
-      const now = new Date().getTime();
-  
-      if (now - timestamp > expiresIn) {
-        localStorage.removeItem('jwtToken');
-        navigate('/404');
-        return;
-      }
-  
-      const decodedToken = jwtDecode(value);
-      if (decodedToken.role !== 'ADMIN') {
-        navigate('/404');
-      }
-    } catch (error) {
-      console.error('Error verifying admin access:', error);
-      navigate('/404');
-    }
-  };
-
-
-  const getAxiosConfig = () => {
-    const tokenData = localStorage.getItem('jwtToken');
-    if (!tokenData) return {};
-    
-    const { value } = JSON.parse(tokenData);
-    return {
-      headers: {
-        'Authorization': `Bearer ${value}`,
-      }
-    };
-  };
-
   const fetchStats = async () => {
     try {
-      const response = await axios.get(
-        'http://localhost:8080/api/admin/stats',
-        getAxiosConfig()
-      );
-      setStats(response.data);
+      const response = await fetch('http://localhost:8080/api/admin/stats', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      }
     } catch (error) {
       console.error('Error fetching stats:', error);
     }
   };
-  
+
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(
-        'http://localhost:8080/api/admin/users',
-        getAxiosConfig()
-      );
-      setUsers(response.data);
+      const response = await fetch('http://localhost:8080/api/admin/users', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data);
+      }
     } catch (error) {
       console.error('Error fetching users:', error);
     }
   };
-  
+
   const handleViewEntries = async (userId, userName) => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/admin/users/${userId}/entries`,
-        getAxiosConfig()
-      );
-      setSelectedUserEntries(response.data);
-      setSelectedUserName(userName);
-      setShowEntriesModal(true);
+      const response = await fetch(`http://localhost:8080/api/admin/users/${userId}/entries`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedUserEntries(data);
+        setSelectedUserName(userName);
+        setShowEntriesModal(true);
+      }
     } catch (error) {
       console.error('Error fetching user entries:', error);
     }
   };
-  
+
   const handleUpdateEntry = async (entryId, updatedData) => {
     try {
-      const response = await axios.put(
-        `http://localhost:8080/api/admin/entries/${entryId}`,
-        updatedData,
-        getAxiosConfig()
-      );
-      setEditingEntry(null);
-      setSelectedUserEntries(entries =>
-        entries.map(entry =>
-          entry.id === entryId ? response.data : entry
-        )
-      );
+      const response = await fetch(`http://localhost:8080/api/admin/entries/${entryId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedData)
+      });
+      if (response.ok) {
+        setEditingEntry(null);
+        const updatedEntry = await response.json();
+        setSelectedUserEntries(entries =>
+          entries.map(entry =>
+            entry.id === entryId ? updatedEntry : entry
+          )
+        );
+      }
     } catch (error) {
       console.error('Error updating entry:', error);
     }
   };
-  
+
   const handleDeleteEntry = async (entryId) => {
     if (window.confirm('Are you sure you want to delete this entry?')) {
       try {
-        await axios.delete(
-          `http://localhost:8080/api/admin/entries/${entryId}`,
-          getAxiosConfig()
-        );
-        setSelectedUserEntries(entries => 
-          entries.filter(entry => entry.id !== entryId)
-        );
+        const response = await fetch(`http://localhost:8080/api/admin/entries/${entryId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+          }
+        });
+        if (response.ok) {
+          setSelectedUserEntries(entries => entries.filter(entry => entry.id !== entryId));
+        }
       } catch (error) {
         console.error('Error deleting entry:', error);
       }
@@ -151,7 +125,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="container p-4">
+    <div className="container-fluid">
       <div className="text-center mb-4">
         <h1 className="display-4 text-primary">CalorieTracker Admin Dashboard</h1>
         <p className="lead text-muted">System Analytics and Management</p>
@@ -185,7 +159,7 @@ const AdminDashboard = () => {
       </div>
 
       <div className="row mb-4">
-        <div className="col-md-6">
+        <div className="col-xl-6">
           <div className="card shadow-sm">
             <div className="card-body">
               <h5 className="card-title">Users Over Monthly Budget</h5>
@@ -205,7 +179,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="col-md-6">
+        <div className="col-xl-6">
           <div className="card shadow-sm">
             <div className="card-body">
               <h5 className="card-title">User Management</h5>
@@ -247,17 +221,10 @@ const AdminDashboard = () => {
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Entries for {selectedUserName}</h5>
-                <button
-                  type="button"
-                  className="close"
-                  onClick={() => setShowEntriesModal(false)}
-                  aria-label="Close"
-                >
-                  <span aria-hidden="true">&times;</span>
-                </button>
+
               </div>
               <div className="modal-body">
-                <table className="table table-striped">
+                <table className="table table-striped" id="modalTable">
                   <thead>
                     <tr>
                       <th>Date</th>
@@ -346,6 +313,7 @@ const AdminDashboard = () => {
                             <td>${entry.price.toFixed(2)}</td>
                             <td>{entry.mealType}</td>
                             <td>
+                            <div className="button-holder">
                               <button
                                 onClick={() => setEditingEntry(entry)}
                                 className="btn btn-warning btn-sm"
@@ -354,10 +322,11 @@ const AdminDashboard = () => {
                               </button>
                               <button
                                 onClick={() => handleDeleteEntry(entry.id)}
-                                className="btn btn-danger btn-sm ms-2"
+                                className="btn btn-danger btn-sm"
                               >
                                 Delete
                               </button>
+                              </div>
                             </td>
                           </>
                         )}

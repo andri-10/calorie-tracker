@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button, Form, Container, Spinner } from 'react-bootstrap';
 import './login.css';
 import headerLogo from '../../images/header-logo.png';
-import EmailUtils from '../utils/EmailUtils';
+import EmailUtils from '../../utils/EmailUtils';
 
 const Reset = () => {
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ const Reset = () => {
   const [smsColor, setSmsColor] = useState('');
   const [loading, setLoading] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
-  const [step, setStep] = useState(1); 
+  const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
 
   const triggerShake = () => {

@@ -18,7 +18,7 @@ const Navbar = () => {
   return (
     <nav className="navbar navbar-expand-lg" style={{ backgroundColor: '#E3F2FD' }}>
       <div className="container">
-        <div >
+        <div header-logo>
           <Link className="navbar-brand d-flex align-items-center link-primary" to="/dashboard">
             <img src={headerLogo} alt="Logo" width="200" height="40" className="me-2" />
           </Link>

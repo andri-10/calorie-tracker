@@ -44,7 +44,7 @@ public class AdminService {
         int lastWeekEntries = foodEntryRepository.countByDateTimeBetween(sevenDaysAgo, now);
         int weekBeforeEntries = foodEntryRepository.countByDateTimeBetween(fourteenDaysAgo, sevenDaysAgo);
 
-        double averageCaloriesPerUser = foodEntryRepository.getAverageCaloriesPerUserLastWeek(sevenDaysAgo);
+        double averageCaloriesPerUser = foodEntryRepository.getAverageCaloriesLastWeek(sevenDaysAgo);
 
         List<UserOverBudgetDTO> usersOverBudget = getUsersOverBudget();
 

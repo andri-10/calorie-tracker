@@ -41,30 +41,30 @@ public class UserController {
     @Autowired
     private EmailService emailService;
 
-    
+
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         try {
-            
+
             if (user.getRole() == null) {
                 user.setRole(User.Role.USER);
             }
 
-            
+
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-            
+
             User registeredUser = userService.registerUser(user);
 
-            
+
             String jwt = jwtUtils.generateToken(registeredUser.getEmail());
 
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("user", registeredUser);
-            response.put("token", jwt);  
+            response.put("token", jwt);
 
-            return ResponseEntity.ok(response);  
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -72,23 +72,23 @@ public class UserController {
         }
     }
 
-    
+
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody User loginUser) {
         try {
-            
+
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginUser.getEmail(), loginUser.getPassword())
             );
 
-            
+
             String jwt = jwtUtils.generateToken(loginUser.getEmail());
             User user = userService.findByEmail(loginUser.getEmail());
 
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("token", jwt);
-            response.put("user", user); 
+            response.put("user", user);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             System.out.println("Authentication failed for user: " + loginUser.getEmail());
