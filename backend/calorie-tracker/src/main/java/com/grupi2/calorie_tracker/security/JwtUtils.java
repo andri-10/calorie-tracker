@@ -1,9 +1,12 @@
 package com.grupi2.calorie_tracker.security;
 
+import com.grupi2.calorie_tracker.entities.User;
+import com.grupi2.calorie_tracker.repositories.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import java.security.Key;
@@ -15,9 +18,16 @@ public class JwtUtils {
     private static final long JWT_EXPIRATION = 86400000; 
     private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
+    @Autowired
+    private UserRepository userRepository;
+
     public String generateToken(String email) {
+        User user = userRepository.findByEmail(email);
+
         return Jwts.builder()
                 .setSubject(email)
+                .claim("role", "ROLE_" + user.getRole().name())
+                .claim("userId", user.getId())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + JWT_EXPIRATION))
                 .signWith(key)

@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Button, Form, Container, Spinner } from 'react-bootstrap';
 import './login.css';
 import headerLogo from '../../images/header-logo.png';
+import { jwtDecode } from 'jwt-decode';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -35,12 +36,20 @@ const Login = () => {
       
       if (response.status === 200) {
         const { token } = response.data;
-       
         localStorage.setItem('jwtToken', token);
-
+        
+        // Decode token to get user role
+        const decoded = jwtDecode(token);
+        
         setSms('Login successful');
         setSmsColor('green');
-        navigate('/dashboard');
+        
+        // Navigate based on role
+        if (decoded.role === 'ROLE_ADMIN') {
+          navigate('/admin');
+        } else {
+          navigate('/dashboard');
+        }
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
@@ -53,7 +62,7 @@ const Login = () => {
     } finally {
       setLoading(false);
     }
-  };
+};
 
   const triggerShake = () => {
     setIsShaking(true);

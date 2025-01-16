@@ -4,6 +4,7 @@ import DailyProgress from './DailyProgress';
 import FoodList from './FoodList';
 import axios from 'axios';
 import './styles/Dashboard.css';
+import MonthlyProgress from './MonthlyProgress';
 
 const Dashboard = ({ userId }) => {
   const [dailyCalories, setDailyCalories] = useState(0);
@@ -11,6 +12,8 @@ const Dashboard = ({ userId }) => {
   const [averageDailyCalories, setAverageDailyCalories] = useState(0);
   const [weeklySpending, setWeeklySpending] = useState(0);
   const [showTips, setShowTips] = useState(false);
+  const [last7DaysCalories, setLast7DaysCalories] = useState([]);
+  
 
   // Thresholds for the daily calories and monthly spending
   const CALORIES_LIMIT = 2500;
@@ -71,6 +74,11 @@ const Dashboard = ({ userId }) => {
             },
           }
         );
+
+        const entries = weeklyResponse.data.entries;
+        const groupedCalories = calculateLast7DaysCalories(entries);
+        setLast7DaysCalories(groupedCalories);
+
         const weeklySpending = weeklyResponse.data.entries.reduce(
           (sum, entry) => sum + entry.price,
           0
@@ -109,8 +117,36 @@ const Dashboard = ({ userId }) => {
     fetchDashboardData();
   }, [userId]);
 
+  const calculateLast7DaysCalories = (entries) => {
+    const dateMap = {};
+
+    // Group calories by date
+    entries.forEach((entry) => {
+      const date = entry.dateTime.split('T')[0];
+      dateMap[date] = (dateMap[date] || 0) + entry.calories;
+    });
+
+    // Create an array for the last 7 days
+    const today = new Date();
+    return Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+
+      const dateString = date.toISOString().split('T')[0];
+      const calories = dateMap[dateString] || 0;
+      const status =
+        calories > CALORIES_LIMIT
+          ? 'danger'
+          : calories >= CALORIES_LIMIT * 0.95
+          ? 'warning'
+          : 'safe';
+
+      return { date: dateString, calories, status };
+    }).reverse(); // Reverse for chronological order
+  };
+
   const updateStatsAfterDeletion = async (deletedEntry) => {
-    // Recalculate stats after the deletion of an entry
+    // Update daily, monthly, and weekly stats
     setDailyCalories((prev) => prev - deletedEntry.calories);
     setMonthlyExpenditure((prev) => prev - deletedEntry.price);
     setWeeklySpending((prev) => prev - deletedEntry.price);
@@ -118,18 +154,38 @@ const Dashboard = ({ userId }) => {
     try {
       const token = localStorage.getItem('jwtToken');
       
-      // Refetch all-time entries after deletion
+      // Refetch weekly entries to recalculate the last 7 days' data
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      const currentWeek = Math.ceil(
+        (today.getDate() - today.getDay() + 7) / 7
+      );
+  
+      const weeklyResponse = await axios.get(
+        `http://localhost:8080/api/food-entries/history`,
+        {
+          params: { range: 'week', year: currentYear, week: currentWeek },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      const entries = weeklyResponse.data.entries;
+      const updatedLast7DaysCalories = calculateLast7DaysCalories(entries);
+      setLast7DaysCalories(updatedLast7DaysCalories);
+  
+      // Refetch all-time entries after deletion for average daily calories
       const allEntriesResponse = await axios.get(
         `http://localhost:8080/api/food-entries/history`,
         {
           params: { range: 'all' },
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
   
-      // Calculate total calories and active days
       const totalCalories = allEntriesResponse.data.entries.reduce(
         (sum, entry) => sum + entry.calories,
         0
@@ -137,15 +193,14 @@ const Dashboard = ({ userId }) => {
   
       const activeDays = new Set();
       allEntriesResponse.data.entries.forEach((entry) => {
-        const date = entry.dateTime.split('T')[0]; // Extract date part
+        const date = entry.dateTime.split('T')[0];
         activeDays.add(date);
       });
   
       const newAverageCalories = activeDays.size > 0 ? totalCalories / activeDays.size : 0;
-  
       setAverageDailyCalories(newAverageCalories);
     } catch (error) {
-      console.error('Error fetching all-time entries after deletion:', error);
+      console.error('Error fetching updated data after deletion:', error);
     }
   };
 
@@ -185,13 +240,13 @@ const Dashboard = ({ userId }) => {
                       dailyCaloriesExceeded ? 'text-danger' : ''
                     }`}
                   >
-                    {dailyCalories} / 2,500
+                    {dailyCalories} / 2500
                   </h2>
                   {dailyCaloriesExceeded && (
                     <p className="text-danger">You've exceeded your daily calorie limit!</p>
                   )}
                 </div>
-                <DailyProgress calories={dailyCalories} maxCalories={2500} />
+                <DailyProgress calories={dailyCalories} maxCalories={CALORIES_LIMIT} />
               </div>
             </div>
           </div>
@@ -212,14 +267,7 @@ const Dashboard = ({ userId }) => {
                     <p className="text-danger">You've exceeded your monthly spending limit!</p>
                   )}
                 </div>
-                <div className="progress mt-5" style={{ height: '10px' }}>
-                  <div
-                    className={`progress-bar ${
-                      monthlyExpenditureExceeded ? 'bg-danger' : 'bg-primary'
-                    }`}
-                    style={{ width: `${(monthlyExpenditure / 1000) * 100}%` }}
-                  ></div>
-                </div>
+                <MonthlyProgress spending={monthlyExpenditure} maxSpending={SPENDING_LIMIT} />
               </div>
             </div>
           </div>
@@ -246,6 +294,52 @@ const Dashboard = ({ userId }) => {
             </div>
           </div>
         </div>
+
+          <div className="col-12 mt-4">
+            <div className="card h-100 border-0 shadow-sm card-hover">
+              <div className="card-body">
+                <h5 className="card-title text-primary fw-bold">Last 7 Days Calories</h5>
+                <div className="table-responsive">
+                  <table className="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Calories</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {last7DaysCalories.map(({ date, calories, status }) => (
+                        <tr key={date}>
+                          <td>{date}</td>
+                          <td>{calories}</td>
+                          <td>
+                            <span
+                              className={`badge ${
+                                status === 'danger'
+                                  ? 'bg-danger'
+                                  : status === 'warning'
+                                  ? 'bg-warning text-dark'
+                                  : 'bg-success'
+                              }`}
+                            >
+                              {status === 'danger'
+                                ? 'Exceeded'
+                                : status === 'warning'
+                                ? 'Warning'
+                                : 'Safe'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        
 
         <div className="mt-4">
           <FoodList updateStatsAfterDeletion={updateStatsAfterDeletion} />

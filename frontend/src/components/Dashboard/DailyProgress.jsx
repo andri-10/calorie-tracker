@@ -2,7 +2,7 @@ import React from 'react';
 
 const DailyProgress = ({ calories, maxCalories }) => {
   const percentage = (calories / maxCalories) * 100;
-  const progressColor = percentage > 100 ? 'danger' : percentage > 75 ? 'warning' : 'success';
+  const progressColor = percentage > 100 ? 'danger' : percentage > 95 ? 'warning' : 'primary';
 
   return (
     <div className="animate-slide-in">

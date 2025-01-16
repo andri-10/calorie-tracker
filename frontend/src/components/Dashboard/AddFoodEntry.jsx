@@ -125,7 +125,7 @@ const AddFoodEntry = () => {
                       onChange={(e) => setFoodEntry({...foodEntry, mealType: e.target.value})}
                       required
                     >
-                      <option value="">Select meal type</option>
+                      <option value="" disabled selected>Select meal type</option>
                       {mealTypes.map(type => (
                         <option key={type} value={type}>
                           {type.charAt(0) + type.slice(1).toLowerCase()}
