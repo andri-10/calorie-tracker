@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, Form, Container, Spinner } from 'react-bootstrap';
 import './login.css';
@@ -71,6 +71,14 @@ const Reset = () => {
     }
   };
 
+  useEffect(() => {
+    const returnToDashboard = localStorage.getItem('returnToDashboard');
+    if (returnToDashboard === 'true') {
+      
+      localStorage.removeItem('returnToDashboard');
+    }
+  }, []);
+
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setSms('');
@@ -94,7 +102,15 @@ const Reset = () => {
       const result = await EmailUtils.resetPassword(newPassword);
       setSms(result.message);
       setSmsColor('green');
-      setTimeout(() => navigate('/login'), 2000);
+      
+      const returnToDashboard = localStorage.getItem('returnToDashboard');
+      setTimeout(() => {
+        if (returnToDashboard === 'true') {
+          navigate('/dashboard');
+        } else {
+          navigate('/login');
+        }
+      }, 2000);
     } catch (error) {
       setSms(error.message);
       setSmsColor('red');

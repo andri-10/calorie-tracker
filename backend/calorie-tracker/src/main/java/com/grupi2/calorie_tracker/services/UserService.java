@@ -52,4 +52,8 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
+
+    public User updateUser(User user) {
+        return userRepository.save(user);
+    }
 }
