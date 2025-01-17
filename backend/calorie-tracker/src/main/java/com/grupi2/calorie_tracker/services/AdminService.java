@@ -1,6 +1,7 @@
 package com.grupi2.calorie_tracker.services;
 
 import com.grupi2.calorie_tracker.dto.AdminStatsResponse;
+import com.grupi2.calorie_tracker.dto.FoodEntryRequest;
 import com.grupi2.calorie_tracker.dto.UserOverBudgetDTO;
 import com.grupi2.calorie_tracker.entities.FoodEntry;
 import com.grupi2.calorie_tracker.entities.User;
@@ -13,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,11 +22,13 @@ public class AdminService {
 
     private final UserRepository userRepository;
     private final FoodEntryRepository foodEntryRepository;
+    private final FoodEntryService foodEntryService;
 
     @Autowired
-    public AdminService(UserRepository userRepository, FoodEntryRepository foodEntryRepository) {
+    public AdminService(UserRepository userRepository, FoodEntryRepository foodEntryRepository, FoodEntryService foodEntryService) {
         this.userRepository = userRepository;
         this.foodEntryRepository = foodEntryRepository;
+        this.foodEntryService = foodEntryService;
     }
 
     public AdminStatsResponse getAdminStats() {
@@ -96,6 +98,11 @@ public class AdminService {
 
     public List<FoodEntry> getUserEntries(Long userId) {
         return foodEntryRepository.findByUserIdOrderByDateTimeDesc(userId);
+    }
+
+    public FoodEntry createFoodEntryForUser(Long userId, FoodEntryRequest request) {
+        // We can reuse the existing foodEntryService method since it has the same functionality
+        return foodEntryService.createFoodEntry(request, userId);
     }
 
     @Transactional

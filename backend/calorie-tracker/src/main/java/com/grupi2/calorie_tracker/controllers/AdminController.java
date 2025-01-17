@@ -1,10 +1,12 @@
 package com.grupi2.calorie_tracker.controllers;
 
 import com.grupi2.calorie_tracker.dto.AdminStatsResponse;
+import com.grupi2.calorie_tracker.dto.FoodEntryRequest;
 import com.grupi2.calorie_tracker.dto.UserOverBudgetDTO;
 import com.grupi2.calorie_tracker.entities.FoodEntry;
 import com.grupi2.calorie_tracker.entities.User;
 import com.grupi2.calorie_tracker.services.AdminService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,6 +42,13 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getUserEntries(userId));
     }
 
+    @PostMapping("/users/{userId}/entries")
+    public ResponseEntity<FoodEntry> addFoodEntryForUser(
+            @PathVariable Long userId,
+            @Valid @RequestBody FoodEntryRequest request) {
+        return ResponseEntity.ok(adminService.createFoodEntryForUser(userId, request));
+    }
+
     @PutMapping("/entries/{entryId}")
     public ResponseEntity<FoodEntry> updateEntry(
             @PathVariable Long entryId,
@@ -52,4 +61,6 @@ public class AdminController {
         adminService.deleteEntry(entryId);
         return ResponseEntity.noContent().build();
     }
+
+
 }
