@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import './styles/History.css';
-
+import { getToken } from '../../utils/authUtils';
 
 const History = () => {
+  const navigate = useNavigate();
   const getISOWeek = (date) => {
     const tempDate = new Date(date);
     tempDate.setHours(0, 0, 0, 0);
@@ -28,6 +30,31 @@ const History = () => {
   const [dateRangeError, setDateRangeError] = useState('');
 
   const today = new Date().toISOString().split('T')[0];
+
+  const fetchWithAuth = async (url) => {
+    const token = getToken();
+    if (!token) {
+      navigate('/login');
+      return null;
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.status === 401) {
+      navigate('/login');
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+
+    return response.json();
+  };
 
   useEffect(() => {
     if (dateRange !== 'all') {
@@ -81,7 +108,6 @@ const History = () => {
     setDateRangeError('');
     fetchAllEntries();
   };
-  
 
   const clearSearch = () => {
     setSearchTerm('');
@@ -90,17 +116,10 @@ const History = () => {
   const fetchAllEntries = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('jwtToken');
       const url = `http://localhost:8080/api/food-entries/history?range=all`;
+      const data = await fetchWithAuth(url);
 
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
+      if (data) {
         setEntries(data.entries || []);
         setFilteredEntries(data.entries || []);
         setTotalCalories(data.totalCalories || 0);
@@ -115,15 +134,12 @@ const History = () => {
   const fetchEntries = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('jwtToken');
       let url = `http://localhost:8080/api/food-entries/history?range=all`;
 
-if (startDate && endDate) {
-  url += `&startDate=${startDate}&endDate=${endDate}`;
-}
+      if (startDate && endDate) {
+        url += `&startDate=${startDate}&endDate=${endDate}`;
+      }
 
-
-  
       if (dateRange === 'week') {
         url += `&year=${selectedYear}&week=${selectedWeek}`;
       } else if (dateRange === 'month') {
@@ -131,15 +147,10 @@ if (startDate && endDate) {
       } else if (dateRange === 'all' && isDateRangeActive && startDate && endDate) {
         url += `&startDate=${startDate}&endDate=${endDate}`;
       }
-  
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-  
-      if (response.ok) {
-        const data = await response.json();
+
+      const data = await fetchWithAuth(url);
+
+      if (data) {
         setEntries(data.entries || []);
         setFilteredEntries(data.entries || []);
         setTotalCalories(data.totalCalories || 0);

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getToken } from '../../utils/authUtils';
 
 const AddFoodEntryModal = ({ userId, onClose, onSuccess }) => {
   const [foodEntry, setFoodEntry] = useState({
@@ -17,11 +18,18 @@ const AddFoodEntryModal = ({ userId, onClose, onSuccess }) => {
     setError('');
 
     try {
+      const token = getToken();  // Get the token using the getToken function
+
+      if (!token) {
+        setError('Authorization token not found. Please log in again.');
+        return;
+      }
+
       const response = await fetch(`http://localhost:8080/api/admin/users/${userId}/entries`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+          'Authorization': `Bearer ${token}`,  // Use the retrieved token
         },
         body: JSON.stringify({
           ...foodEntry,

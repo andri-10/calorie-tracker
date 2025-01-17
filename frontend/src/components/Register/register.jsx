@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Button, Form, Container } from 'react-bootstrap';
 import './register.css';
-import headerLogo from '../../images/header-logo.png'; // Assuming the logo is used here too
+import headerLogo from '../../images/header-logo.png'; 
+import { setToken } from '../../utils/authUtils'; 
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -27,17 +28,14 @@ const Register = () => {
     e.preventDefault();
     setSms('');
 
-    // Destructure form data for easier use
     const { name, email, password, confirmPass } = formData;
 
-    // Empty fields validation
     if (!name || !email || !password || !confirmPass) {
       setSms('Please fill in all fields!');
       setSmsColor('red');
       return;
     }
 
-    // Email validation
     if (!/^[a-zA-Z0-9._%+-]+@[a-zAZ0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
       setSms('Email is invalid');
       setSmsColor('red');
@@ -50,7 +48,6 @@ const Register = () => {
       return;
     }
 
-    // Check if passwords match
     if (confirmPass !== password) {
       setSms('Passwords don\'t match');
       setSmsColor('red');
@@ -85,11 +82,11 @@ const Register = () => {
       if (response.status === 200) {
         setSms('Registration successful');
         setSmsColor('green');
-        // Store the token if needed
+        
         if (response.data.token) {
-          localStorage.setItem('token', response.data.token);
+          setToken(response.data.token);
         }
-        // Redirect to login page after successful registration
+
         setTimeout(() => {
           window.location.href = "/login";
         }, 1500);

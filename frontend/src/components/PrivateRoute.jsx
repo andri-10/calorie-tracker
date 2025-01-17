@@ -1,29 +1,29 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { getToken } from '../utils/authUtils';
 import { jwtDecode } from 'jwt-decode';
 
-const PrivateRoute = ({ element: Element, requiredRole = null }) => {
-  const token = localStorage.getItem('jwtToken');
+const PrivateRoute = ({ element, requiredRole }) => {
+  const token = getToken();
   
   if (!token) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
-  try {
-    const decoded = jwtDecode(token);
-    
-    if (requiredRole) {
-      const userRole = decoded.role;
-      if (!userRole || userRole !== requiredRole) {
-        return <Navigate to="/dashboard" />;
+  if (requiredRole) {
+    try {
+      const decoded = jwtDecode(token);
+
+      if (!decoded.role || decoded.role !== requiredRole) {
+        return <Navigate to="/dashboard" replace />;
       }
+    } catch (error) {
+      console.error('Token decoding failed:', error);
+      return <Navigate to="/login" replace />;
     }
-    
-    return Element;
-  } catch (error) {
-    localStorage.removeItem('jwtToken');
-    return <Navigate to="/login" />;
   }
+
+  return element;
 };
 
 export default PrivateRoute;

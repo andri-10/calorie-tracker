@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import "./AdminDashboard.css";
+import { useNavigate } from 'react-router-dom';
+import { getToken, clearToken } from '../../utils/authUtils';
 import Navbar from '../Dashboard/Navbar';
 import AddFoodEntryModal from './AddFoodEntryModal';
+import './AdminDashboard.css';
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalEntries: 0,
@@ -23,22 +26,28 @@ const AdminDashboard = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
 
   useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      clearToken();
+      navigate('/login');
+    }
+
     fetchStats();
     fetchUsers();
 
-    // Set an interval to update stats in real time
     const intervalId = setInterval(() => {
       fetchStats();
-    }, 10000); // Update every 10 seconds
+    }, 10000);
 
-    return () => clearInterval(intervalId); // Cleanup interval on unmount
-  }, []);
+    return () => clearInterval(intervalId);
+  }, [navigate]);
 
   const fetchStats = async () => {
     try {
+      const token = getToken();
       const response = await fetch('http://localhost:8080/api/admin/stats', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       if (response.ok) {
@@ -52,9 +61,10 @@ const AdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
+      const token = getToken();
       const response = await fetch('http://localhost:8080/api/admin/users', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       if (response.ok) {
@@ -69,49 +79,45 @@ const AdminDashboard = () => {
   const handleViewEntries = async (userId, userName) => {
     try {
       setSelectedUserId(userId);
+      const token = getToken();
       const response = await fetch(`http://localhost:8080/api/admin/users/${userId}/entries`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       if (response.ok) {
         const data = await response.json();
         setSelectedUserEntries(data);
         setSelectedUserName(userName);
-  
-        // Get today's date and the date from 7 days ago
+
         const today = new Date();
         const lastWeek = new Date(today);
         lastWeek.setDate(today.getDate() - 7);
-  
-        // Filter entries for the last 7 days
+
         const recentEntries = data.filter(entry => {
           const entryDate = new Date(entry.dateTime);
           return entryDate >= lastWeek && entryDate <= today;
         });
-  
-        // Calculate the total calories for the filtered entries
+
         const totalCalories = recentEntries.reduce((sum, entry) => sum + entry.calories, 0);
         
-        // Calculate the average calories for the last week
         const averageCalories = recentEntries.length > 0 ? totalCalories / recentEntries.length : 0;
-  
-        // Directly set the average calories for the user for the last week
+
         setUserAverageCalories(averageCalories);
-  
         setShowEntriesModal(true);
       }
     } catch (error) {
       console.error('Error fetching user entries:', error);
     }
   };
-  
+
   const handleUpdateEntry = async (entryId, updatedData) => {
     try {
+      const token = getToken();
       const response = await fetch(`http://localhost:8080/api/admin/entries/${entryId}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(updatedData)
@@ -135,17 +141,16 @@ const AdminDashboard = () => {
   const handleDeleteEntry = async (entryId) => {
     if (window.confirm('Are you sure you want to delete this entry?')) {
       try {
+        const token = getToken();
         const response = await fetch(`http://localhost:8080/api/admin/entries/${entryId}`, {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+            'Authorization': `Bearer ${token}`
           }
         });
         if (response.ok) {
-          // Remove the entry from the local state
           setSelectedUserEntries(entries => entries.filter(entry => entry.id !== entryId));
 
-          // Fetch updated stats to reflect the change
           await fetchStats();
         }
       } catch (error) {

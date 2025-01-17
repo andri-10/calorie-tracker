@@ -1,33 +1,36 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode'; // Correct import for named export
+import { jwtDecode } from 'jwt-decode';
+import { getToken, clearToken } from '../../utils/authUtils';
 import headerLogo from '../../images/header-logo.png';
 
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [userRole, setUserRole] = useState(null);
 
   const getLinkClass = (path) =>
     `nav-link fw-medium link-primary ${location.pathname === path ? 'active' : ''}`;
 
-  // Decode the JWT token to get the user's role
-  const token = localStorage.getItem('jwtToken');
-  let userRole = null;
-
-  if (token) {
-    try {
-      const decodedToken = jwtDecode(token);
-      userRole = decodedToken.role;
-    } catch (error) {
-      console.error('Invalid token:', error);
-      localStorage.removeItem('jwtToken');
-      navigate('/');
+  useEffect(() => {
+    const token = getToken();
+    
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        setUserRole(decodedToken.role);
+      } catch (error) {
+        console.error('Invalid token:', error);
+        clearToken();
+        navigate('/');
+      }
     }
-  }
+  }, [navigate]);
 
   const handleLogout = (e) => {
     e.preventDefault();
-    localStorage.removeItem('jwtToken');
+    clearToken();
+    setUserRole(null);
     navigate('/');
   };
 

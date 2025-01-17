@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import { getToken, clearToken } from './authUtils';
 
 const AdminRoute = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -8,20 +9,20 @@ const AdminRoute = () => {
 
   useEffect(() => {
     const checkAuth = () => {
-      const tokenData = localStorage.getItem('jwtToken');
-      
+      const tokenData = getToken();
+
       if (!tokenData) {
         setIsAuthorized(false);
         setIsLoading(false);
         return;
       }
-      
+
       try {
         const { value, timestamp, expiresIn } = JSON.parse(tokenData);
         const now = new Date().getTime();
 
         if (now - timestamp > expiresIn) {
-          localStorage.removeItem('jwtToken');
+          clearToken();
           setIsAuthorized(false);
           setIsLoading(false);
           return;
@@ -31,9 +32,10 @@ const AdminRoute = () => {
         setIsAuthorized(decodedToken.role === 'ADMIN');
       } catch (error) {
         console.error('Error verifying admin access:', error);
+        clearToken();
         setIsAuthorized(false);
       }
-      
+
       setIsLoading(false);
     };
 

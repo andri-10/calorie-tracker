@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getToken, setupTokenCleanup } from '../../utils/authUtils'; 
 import fullLogo from '../../images/logo-full.png';
 import animation from '../../images/heart-animation.gif';
-import bgImage from '../../images/bg-image.png';
 import './LandingPage.css';
 
 const LandingPage = () => {
@@ -10,30 +10,29 @@ const LandingPage = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('jwtToken');
-    setIsLoggedIn(!!token);
-  }, []);
+    setupTokenCleanup(); // Initialize cleanup logic
+
+    // Check if the user has a token on initial load
+    const token = getToken();
+    if (token) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, []); 
 
   return (
-    <div
-      className="landing-container fade-in-animation"
-      
-    >
+    <div className="landing-container fade-in-animation">
       <div className="landing-content">
         <div className="content-wrapper">
           <div className="logo-container">
-            <img
-              src={fullLogo}
-              alt="Logo"
-              className="logo slide-down-animation"
-            />
+            <img src={fullLogo} alt="Logo" className="logo slide-down-animation" />
           </div>
 
           <div className="text-content fade-in-animation">
             <h1 className="title">Track Your Calories & Budget</h1>
             <p className="description">
-              Keep track of your daily nutrition and spending with our
-              easy-to-use calorie and budget tracker.
+              Keep track of your daily nutrition and spending with our easy-to-use calorie and budget tracker.
             </p>
             <div className="buttons-container">
               {isLoggedIn ? (

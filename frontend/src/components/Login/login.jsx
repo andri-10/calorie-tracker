@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button, Form, Container, Spinner } from 'react-bootstrap';
+import { setToken, setupTokenCleanup } from '../../utils/authUtils';
 import './login.css';
 import headerLogo from '../../images/header-logo.png';
 import { jwtDecode } from 'jwt-decode';
@@ -16,6 +17,10 @@ const Login = () => {
   const [isShaking, setIsShaking] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    setupTokenCleanup();
+  }, []);
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSms('');
@@ -36,15 +41,13 @@ const Login = () => {
       
       if (response.status === 200) {
         const { token } = response.data;
-        localStorage.setItem('jwtToken', token);
+        setToken(token); // Use the new setToken function
         
-        // Decode token to get user role
         const decoded = jwtDecode(token);
         
         setSms('Login successful');
         setSmsColor('green');
         
-        // Navigate based on role
         if (decoded.role === 'ROLE_ADMIN') {
           navigate('/admin');
         } else {
@@ -62,7 +65,7 @@ const Login = () => {
     } finally {
       setLoading(false);
     }
-};
+  };
 
   const triggerShake = () => {
     setIsShaking(true);

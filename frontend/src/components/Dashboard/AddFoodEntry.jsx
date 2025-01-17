@@ -1,28 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
+import { getToken } from '../../utils/authUtils';
 
 const AddFoodEntry = () => {
+  const navigate = useNavigate();
   const [foodEntry, setFoodEntry] = useState({
     foodName: '',
     calories: '',
     price: '',
     mealType: '',
     description: '',
-    dateTime: new Date().toISOString() // Set the default to the current timestamp
+    dateTime: new Date().toISOString()
   });
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [token, setToken] = useState(null);
-
-  useEffect(() => {
-    // Get token when component mounts
-    const storedToken = localStorage.getItem('jwtToken');
-    setToken(storedToken);
-
-    // Debug log - remove in production
-    console.log('Token from localStorage:', storedToken);
-  }, []);
 
   const mealTypes = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'];
 
@@ -32,20 +25,18 @@ const AddFoodEntry = () => {
     setSuccess(false);
 
     try {
-      // Get token again in case it was updated
-      const currentToken = localStorage.getItem('jwtToken');
-      if (!currentToken) {
-        throw new Error('Not authenticated - No token found');
+      const token = getToken();
+      if (!token) {
+        navigate('/login');
+        return;
       }
 
-      // Here we base the dateTime on the current system time (i.e., when the food entry is created)
-      const currentDateTime = new Date().toISOString(); // Get the current UTC time
-
+      const currentDateTime = new Date().toISOString();
       const response = await fetch('http://localhost:8080/api/food-entries', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${currentToken}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           foodName: foodEntry.foodName,
@@ -53,12 +44,22 @@ const AddFoodEntry = () => {
           price: parseFloat(foodEntry.price),
           mealType: foodEntry.mealType,
           description: foodEntry.description,
-          dateTime: currentDateTime, // Send current date and time from the system (UTC)
+          dateTime: currentDateTime,
         }),
       });
 
       if (response.ok) {
         setSuccess(true);
+        setFoodEntry({
+          foodName: '',
+          calories: '',
+          price: '',
+          mealType: '',
+          description: '',
+          dateTime: new Date().toISOString()
+        });
+      } else if (response.status === 401) {
+        navigate('/login');
       } else {
         const errorData = await response.json();
         setError(errorData.message || 'Failed to add food entry.');
@@ -68,8 +69,7 @@ const AddFoodEntry = () => {
     }
   };
 
-  // If no token is found, show a message
-  if (!token) {
+  if (!getToken()) {
     return (
       <div className="min-vh-100 bg-light p-0">
         <Navbar />
@@ -81,6 +81,7 @@ const AddFoodEntry = () => {
       </div>
     );
   }
+
 
   return (
     <div className="min-vh-100 bg-light p-0">
