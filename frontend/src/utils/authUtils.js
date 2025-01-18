@@ -1,22 +1,10 @@
-let isNavigatingToLandingPage = false;
-
 export const setupTokenCleanup = () => {
   window.addEventListener('beforeunload', cleanupTokenOnClose);
   window.addEventListener('unload', cleanupTokenOnClose);
 };
 
 export const cleanupTokenOnClose = () => {
-  if (!isNavigatingToLandingPage) {
-    localStorage.removeItem('jwtToken');
-  }
-};
-
-export const markNavigatingToLandingPage = () => {
-  isNavigatingToLandingPage = true;
-};
-
-export const resetNavigatingFlag = () => {
-  isNavigatingToLandingPage = false;
+  localStorage.removeItem('jwtToken');
 };
 
 export const setToken = (token) => {
