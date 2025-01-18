@@ -24,9 +24,7 @@ const ProfilePopup = ({ show, onHide }) => {
         try {
           const tokenData = JSON.parse(token);
           tokenValue = tokenData.value;
-        } catch {
-         
-        }
+        } catch {}
 
         const response = await fetch('http://localhost:8080/users/profile', {
           headers: {
@@ -64,9 +62,7 @@ const ProfilePopup = ({ show, onHide }) => {
       try {
         const tokenData = JSON.parse(token);
         tokenValue = tokenData.value;
-      } catch {
-       
-      }
+      } catch {}
 
       const response = await fetch('http://localhost:8080/users/profile/update', {
         method: 'PUT',
@@ -103,6 +99,12 @@ const ProfilePopup = ({ show, onHide }) => {
     navigate('/reset');
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString(); // Formats as MM/DD/YYYY
+  };
+
   return (
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header closeButton>
@@ -130,7 +132,11 @@ const ProfilePopup = ({ show, onHide }) => {
                 disabled={!isEditing}
               />
             </Form.Group>
-            <div className="d-flex gap-2">
+            {/* Displayed Joined Date below all inputs */}
+            <Form.Text className="text-muted">
+              <strong>Joined Date: </strong>{formatDate(user.joinedDate)}
+            </Form.Text>
+            <div className="d-flex gap-2 mt-3">
               {!isEditing ? (
                 <>
                   <Button variant="primary" onClick={handleEdit}>

@@ -2,6 +2,9 @@ package com.grupi2.calorie_tracker.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -28,10 +31,15 @@ public class User {
     @Column(name = "role", nullable = false)
     private Role role = Role.USER;
 
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false, nullable = false)
+    private LocalDateTime createdAt;
+
     public enum Role {
         ADMIN, USER
     }
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -70,5 +78,13 @@ public class User {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

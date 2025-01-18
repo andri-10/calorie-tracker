@@ -100,8 +100,13 @@ public class AdminService {
         return foodEntryRepository.findByUserIdOrderByDateTimeDesc(userId);
     }
 
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
     public FoodEntry createFoodEntryForUser(Long userId, FoodEntryRequest request) {
-        // We can reuse the existing foodEntryService method since it has the same functionality
+
         return foodEntryService.createFoodEntry(request, userId);
     }
 

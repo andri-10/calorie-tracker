@@ -155,9 +155,21 @@ public class UserController {
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile(@RequestHeader("Authorization") String token) {
         try {
+
             String email = jwtUtils.getUserEmailFromToken(token.replace("Bearer ", ""));
             User user = userService.findByEmail(email);
-            return ResponseEntity.ok(user);
+
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "User not found"));
+            }
+
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("user", user);
+            response.put("joinedDate", user.getCreatedAt());
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }

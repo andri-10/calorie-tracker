@@ -18,7 +18,6 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    
     public User registerUser(User user) {
         if (userRepository.findByEmail(user.getEmail()) != null) {
             throw new IllegalArgumentException("Email is already in use.");
@@ -28,12 +27,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    
     public User getUserById(Long userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isPresent()) {
