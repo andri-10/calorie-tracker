@@ -1,10 +1,7 @@
-<<<<<<< HEAD
-=======
 let isNavigatingToLandingPage = false;
 let serverCheckInterval = null;
 let lastSuccessfulCheck = Date.now();
 
->>>>>>> d3987158af954a24bd5d6cd6f4924c1da6923c4e
 export const setupTokenCleanup = () => {
   window.addEventListener('beforeunload', handleBeforeUnload);
   startServerCheck();
@@ -98,7 +95,6 @@ export const setToken = (token) => {
     expiresIn: 86400000, // 24 hours
   };
   localStorage.setItem('jwtToken', JSON.stringify(tokenData));
-  // Start checking servers when token is set
   setupTokenCleanup();
 };
 

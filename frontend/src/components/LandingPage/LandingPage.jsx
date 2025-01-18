@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getToken, setupTokenCleanup } from '../../utils/authUtils'; 
+import { 
+  getToken, 
+  setupTokenCleanup, 
+  markNavigatingToLandingPage,
+  resetNavigatingFlag 
+} from '../../utils/authUtils'; 
 import fullLogo from '../../images/logo-full.png';
 import animation from '../../images/heart-animation.gif';
 import './LandingPage.css';
@@ -8,18 +13,40 @@ import './LandingPage.css';
 const LandingPage = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setupTokenCleanup(); // Initialize cleanup logic
+    // Mark that we're on landing page
+    markNavigatingToLandingPage();
+    
+    // Initialize token cleanup
+    setupTokenCleanup();
 
-    // Check if the user has a token on initial load
-    const token = getToken();
-    if (token) {
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
-    }
+    // Function to check auth status
+    const checkAuth = () => {
+      const token = getToken();
+      setIsLoggedIn(!!token);
+      setIsLoading(false);
+    };
+
+    // Initial check
+    checkAuth();
+
+    // Clean up when component unmounts
+    return () => {
+      resetNavigatingFlag();
+    };
   }, []); 
+
+  const handleNavigation = (path) => {
+    // Reset the navigating flag before navigation
+    resetNavigatingFlag();
+    navigate(path);
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="landing-container fade-in-animation">
@@ -37,7 +64,7 @@ const LandingPage = () => {
             <div className="buttons-container">
               {isLoggedIn ? (
                 <button
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => handleNavigation('/dashboard')}
                   className="dashboard-btn login-btn"
                 >
                   Dashboard
@@ -45,13 +72,13 @@ const LandingPage = () => {
               ) : (
                 <>
                   <button
-                    onClick={() => navigate('/login')}
+                    onClick={() => handleNavigation('/login')}
                     className="login-btn"
                   >
                     Login
                   </button>
                   <button
-                    onClick={() => navigate('/register')}
+                    onClick={() => handleNavigation('/register')}
                     className="register-btn"
                   >
                     Register
@@ -72,7 +99,7 @@ const LandingPage = () => {
       </div>
 
       <footer className="landing-footer fw-bold">
-        <p>&copy; CaloriesTracker 2025. All Rights Reserved.</p>
+        <p>&copy; CalorieTracker 2025. All Rights Reserved.</p>
       </footer>
     </div>
   );

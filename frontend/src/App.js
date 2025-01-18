@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import PrivateRoute from './components/PrivateRoute';
+import PrivateRoute from './components/Routes/PrivateRoute';
+import PublicRoute from './components/Routes/PublicRoute';
 import Login from './components/Login/login';
 import Reset from './components/Login/reset';
 import Register from './components/Register/register';
@@ -14,13 +15,24 @@ function App() {
   return (
     <div className="App">
       <Routes>
-        
+        {/* Public landing page - accessible to all */}
         <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/reset" element={<Reset />} />
-
         
+        {/* Auth routes - only for non-authenticated users */}
+        <Route 
+          path="/login" 
+          element={<PublicRoute element={<Login />} />} 
+        />
+        <Route 
+          path="/register" 
+          element={<PublicRoute element={<Register />} />} 
+        />
+        <Route 
+          path="/reset" 
+          element={<PublicRoute element={<Reset />} />} 
+        />
+
+        {/* Private routes - only for authenticated users */}
         <Route 
           path="/dashboard" 
           element={<PrivateRoute element={<Dashboard />} />} 
@@ -34,7 +46,7 @@ function App() {
           element={<PrivateRoute element={<History />} />} 
         />
 
-        
+        {/* Admin routes */}
         <Route 
           path="/admin" 
           element={<PrivateRoute element={<AdminDashboard />} requiredRole="ROLE_ADMIN" />} 

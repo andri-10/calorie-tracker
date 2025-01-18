@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { getToken } from '../utils/authUtils';
-import jwtDecode from 'jwt-decode';
+import { getToken } from '../../utils/authUtils';
+import { jwtDecode } from 'jwt-decode';
 
 const PrivateRoute = ({ element, requiredRole }) => {
   const token = getToken();
