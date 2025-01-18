@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import {jwtDecode} from 'jwt-decode'; // Remove curly braces for default import
+import { jwtDecode } from 'jwt-decode'; 
 import headerLogo from '../../images/header-logo.png';
 import ProfilePopup from './ProfilePopup.jsx';
 
@@ -10,6 +10,7 @@ const Navbar = () => {
 
   const getLinkClass = (path) =>
     `nav-link fw-medium link-primary ${location.pathname === path ? 'active' : ''}`;
+
   const token = localStorage.getItem('jwtToken');
   let userRole = null;
 
@@ -20,13 +21,15 @@ const Navbar = () => {
     } catch (error) {
       console.error('Invalid token:', error);
       localStorage.removeItem('jwtToken');
+      localStorage.removeItem('user');
       navigate('/');
     }
   }
 
   const handleLogout = (e) => {
     e.preventDefault();
-    localStorage.removeItem('jwtToken');
+    localStorage.removeItem('jwtToken');  
+    localStorage.removeItem('user');  
     navigate('/');
   };
 
