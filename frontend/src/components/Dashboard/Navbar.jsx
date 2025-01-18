@@ -1,52 +1,51 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
-import { getToken, clearToken } from '../../utils/authUtils';
+import {jwtDecode} from 'jwt-decode'; // Remove curly braces for default import
 import headerLogo from '../../images/header-logo.png';
+import ProfilePopup from './ProfilePopup.jsx';
 
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [userRole, setUserRole] = useState(null);
 
   const getLinkClass = (path) =>
     `nav-link fw-medium link-primary ${location.pathname === path ? 'active' : ''}`;
+  const token = localStorage.getItem('jwtToken');
+  let userRole = null;
 
-  useEffect(() => {
-    const token = getToken();
-    
-    if (token) {
-      try {
-        const decodedToken = jwtDecode(token);
-        setUserRole(decodedToken.role);
-      } catch (error) {
-        console.error('Invalid token:', error);
-        clearToken();
-        navigate('/');
-      }
+  if (token) {
+    try {
+      const decodedToken = jwtDecode(token);
+      userRole = decodedToken.role;
+    } catch (error) {
+      console.error('Invalid token:', error);
+      localStorage.removeItem('jwtToken');
+      navigate('/');
     }
-  }, [navigate]);
+  }
 
   const handleLogout = (e) => {
     e.preventDefault();
-    clearToken();
-    setUserRole(null);
+    localStorage.removeItem('jwtToken');
     navigate('/');
   };
+
+  const [showProfile, setShowProfile] = useState(false);
 
   return (
     <nav className="navbar navbar-expand-lg" style={{ backgroundColor: '#E3F2FD' }}>
       <div className="container">
-        <div header-logo>
-          <Link className="navbar-brand d-flex align-items-center link-primary" to="/dashboard">
-            <img src={headerLogo} alt="Logo" width="200" height="40" className="me-2" />
-          </Link>
-        </div>
+        <Link className="navbar-brand d-flex align-items-center link-primary" to="/dashboard">
+          <img src={headerLogo} alt="Logo" width="200" height="40" className="me-2" />
+        </Link>
         <button
           className="navbar-toggler"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
         >
           <span className="navbar-toggler-icon"></span>
         </button>
@@ -75,6 +74,14 @@ const Navbar = () => {
               </Link>
             </li>
             <li className="nav-item">
+              <button
+                className="nav-link fw-medium link-primary border-0 bg-transparent"
+                onClick={() => setShowProfile(true)}
+              >
+                Account
+              </button>
+            </li>
+            <li className="nav-item">
               <Link
                 className="nav-link fw-medium link-primary"
                 to="/"
@@ -86,6 +93,7 @@ const Navbar = () => {
           </ul>
         </div>
       </div>
+      <ProfilePopup show={showProfile} onHide={() => setShowProfile(false)} />
     </nav>
   );
 };

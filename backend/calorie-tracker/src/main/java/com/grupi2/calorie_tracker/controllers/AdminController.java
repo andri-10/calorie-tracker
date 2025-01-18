@@ -42,6 +42,12 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getUserEntries(userId));
     }
 
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<User> getUserById(@PathVariable Long userId) {
+        User user = adminService.getUserById(userId);
+        return ResponseEntity.ok(user);
+    }
+
     @PostMapping("/users/{userId}/entries")
     public ResponseEntity<FoodEntry> addFoodEntryForUser(
             @PathVariable Long userId,

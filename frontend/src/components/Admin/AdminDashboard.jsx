@@ -24,6 +24,14 @@ const AdminDashboard = () => {
   const [userAverageCalories, setUserAverageCalories] = useState(0);
   const [showAddEntryModal, setShowAddEntryModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [expandedEntry, setExpandedEntry] = useState(null);
+  const [userJoinDate, setUserJoinDate] = useState(null);
+
+
+  const toggleAccordion = (entryId) => {
+    setExpandedEntry(prev => prev === entryId ? null : entryId);
+  };
+  
 
   useEffect(() => {
     const token = getToken();
@@ -80,29 +88,43 @@ const AdminDashboard = () => {
     try {
       setSelectedUserId(userId);
       const token = getToken();
-      const response = await fetch(`http://localhost:8080/api/admin/users/${userId}/entries`, {
+      
+      
+      const userResponse = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      if (response.ok) {
-        const data = await response.json();
-        setSelectedUserEntries(data);
+      
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
         setSelectedUserName(userName);
-
+        setUserJoinDate(userData.createdAt); 
+      }
+  
+      const entriesResponse = await fetch(`http://localhost:8080/api/admin/users/${userId}/entries`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (entriesResponse.ok) {
+        const data = await entriesResponse.json();
+        setSelectedUserEntries(data);
+  
         const today = new Date();
         const lastWeek = new Date(today);
         lastWeek.setDate(today.getDate() - 7);
-
+  
         const recentEntries = data.filter(entry => {
           const entryDate = new Date(entry.dateTime);
           return entryDate >= lastWeek && entryDate <= today;
         });
-
+  
         const totalCalories = recentEntries.reduce((sum, entry) => sum + entry.calories, 0);
         
         const averageCalories = recentEntries.length > 0 ? totalCalories / recentEntries.length : 0;
-
+  
         setUserAverageCalories(averageCalories);
         setShowEntriesModal(true);
       }
@@ -110,6 +132,7 @@ const AdminDashboard = () => {
       console.error('Error fetching user entries:', error);
     }
   };
+  
 
   const handleUpdateEntry = async (entryId, updatedData) => {
     try {
@@ -275,144 +298,171 @@ const AdminDashboard = () => {
         </div>
 
         {showEntriesModal && (
-          <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1" role="dialog">
-            <div className="modal-dialog modal-lg" role="document">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Entries for {selectedUserName}</h5>
-                  <div>
-                    <button
-                      className="btn btn-primary me-2"
-                      onClick={() => setShowAddEntryModal(true)}
-                    >
-                      Add Entry
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => setShowEntriesModal(false)}
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-                <div className="modal-body">
-                  <h6>Average calories for this user last week: {userAverageCalories.toFixed(2)} kcal</h6>
-                  <table className="table table-striped" id="modalTable">
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Food</th>
-                        <th>Calories</th>
-                        <th>Price</th>
-                        <th>Meal Type</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedUserEntries.map(entry => (
-                        <tr key={entry.id}>
-                          {editingEntry?.id === entry.id ? (
-                            <>
-                              <td>{new Date(entry.dateTime).toLocaleDateString()}</td>
-                              <td>
-                                <input
-                                  type="text"
-                                  value={editingEntry.foodName}
-                                  onChange={e => setEditingEntry({
-                                    ...editingEntry,
-                                    foodName: e.target.value
-                                  })}
-                                  className="form-control"
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  type="number"
-                                  value={editingEntry.calories}
-                                  onChange={e => setEditingEntry({
-                                    ...editingEntry,
-                                    calories: parseInt(e.target.value)
-                                  })}
-                                  className="form-control"
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  value={editingEntry.price}
-                                  onChange={e => setEditingEntry({
-                                    ...editingEntry,
-                                    price: parseFloat(e.target.value)
-                                  })}
-                                  className="form-control"
-                                />
-                              </td>
-                              <td>
-                                <select
-                                  value={editingEntry.mealType}
-                                  onChange={e => setEditingEntry({
-                                    ...editingEntry,
-                                    mealType: e.target.value
-                                  })}
-                                  className="form-control"
-                                >
-                                  <option value="BREAKFAST">Breakfast</option>
-                                  <option value="LUNCH">Lunch</option>
-                                  <option value="DINNER">Dinner</option>
-                                  <option value="SNACK">Snack</option>
-                                </select>
-                              </td>
-                              <td>
-                                <button
-                                  onClick={() => handleSaveEdit(editingEntry)}
-                                  className="btn btn-success btn-sm"
-                                >
-                                  Save
-                                </button>
-                                <button
-                                  onClick={() => setEditingEntry(null)}
-                                  className="btn btn-secondary btn-sm ms-2"
-                                >
-                                  Cancel
-                                </button>
-                              </td>
-                            </>
-                          ) : (
-                            <>
-                              <td>{new Date(entry.dateTime).toLocaleDateString()}</td>
-                              <td>{entry.foodName}</td>
-                              <td>{entry.calories}</td>
-                              <td>${entry.price.toFixed(2)}</td>
-                              <td>{entry.mealType}</td>
-                              <td>
-                                <div className="button-holder">
-                                  <button
-                                    onClick={() => setEditingEntry(entry)}
-                                    className="btn btn-warning btn-sm"
-                                  >
-                                    Edit
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteEntry(entry.id)}
-                                    className="btn btn-danger btn-sm"
-                                  >
-                                    Delete
-                                  </button>
-                                </div>
-                              </td>
-                            </>
-                          )}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+  <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1" role="dialog">
+    <div className="modal-dialog modal-lg" role="document">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h5 className="modal-title">Entries for {selectedUserName}</h5>
+          <div>
+            <button
+              className="btn btn-primary me-2"
+              onClick={() => setShowAddEntryModal(true)}
+            >
+              Add Entry
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setShowEntriesModal(false)}
+            >
+              Close
+            </button>
           </div>
-        )}
+        </div>
+        <div className="modal-body">
+          <h6>Average calories for this user last week: {userAverageCalories.toFixed(2)} kcal</h6>
+          <h6>Joined on: {userJoinDate ? new Date(userJoinDate).toLocaleDateString() : 'N/A'}</h6> {/* Display Join Date */}
+          <table className="table table-striped" id="modalTable">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Food</th>
+                <th>Calories</th>
+                <th>Price</th>
+                <th>Meal Type</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedUserEntries.map(entry => (
+                <React.Fragment key={entry.id}>
+                  <tr
+                    className="clickable-row"
+                    onClick={() => toggleAccordion(entry.id)}
+                  >
+                    {editingEntry?.id === entry.id ? (
+                      <>
+                        <td>{new Date(entry.dateTime).toLocaleDateString()}</td>
+                        <td>
+                          <input
+                            type="text"
+                            value={editingEntry.foodName}
+                            onChange={e => setEditingEntry({
+                              ...editingEntry,
+                              foodName: e.target.value
+                            })}
+                            className="form-control"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            value={editingEntry.calories}
+                            onChange={e => setEditingEntry({
+                              ...editingEntry,
+                              calories: parseInt(e.target.value)
+                            })}
+                            className="form-control"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={editingEntry.price}
+                            onChange={e => setEditingEntry({
+                              ...editingEntry,
+                              price: parseFloat(e.target.value)
+                            })}
+                            className="form-control"
+                          />
+                        </td>
+                        <td>
+                          <select
+                            value={editingEntry.mealType}
+                            onChange={e => setEditingEntry({
+                              ...editingEntry,
+                              mealType: e.target.value
+                            })}
+                            className="form-control"
+                          >
+                            <option value="BREAKFAST">Breakfast</option>
+                            <option value="LUNCH">Lunch</option>
+                            <option value="DINNER">Dinner</option>
+                            <option value="SNACK">Snack</option>
+                          </select>
+                        </td>
+                        <td>
+                          <button
+                            onClick={() => handleSaveEdit(editingEntry)}
+                            className="btn btn-success btn-sm"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setEditingEntry(null)}
+                            className="btn btn-secondary btn-sm ms-2"
+                          >
+                            Cancel
+                          </button>
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td>{new Date(entry.dateTime).toLocaleDateString()}</td>
+                        <td>{entry.foodName}</td>
+                        <td>{entry.calories}</td>
+                        <td>${entry.price.toFixed(2)}</td>
+                        <td>{entry.mealType}</td>
+                        <td>
+                          <div className="button-holder">
+                            <button
+                              onClick={() => setEditingEntry(entry)}
+                              className="btn btn-warning btn-sm"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteEntry(entry.id)}
+                              className="btn btn-danger btn-sm"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </>
+                    )}
+                  </tr>
+                  {expandedEntry === entry.id && (
+                    <tr>
+                      <td colSpan="6" className="bg-light">
+                        <strong>Description: </strong>
+                        {editingEntry?.id === entry.id ? (
+                          <textarea
+                            value={editingEntry.description}
+                            onChange={e => setEditingEntry({
+                              ...editingEntry,
+                              description: e.target.value
+                            })}
+                            className="form-control"
+                            rows="3"
+                          />
+                        ) : (
+                          entry.description || 'No description provided.'
+                        )}
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
 
         {showAddEntryModal && (
           <AddFoodEntryModal

@@ -13,10 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.HashMap;
@@ -153,6 +150,64 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "An error occurred while updating the password"));
         }
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getUserProfile(@RequestHeader("Authorization") String token) {
+        try {
+
+            String email = jwtUtils.getUserEmailFromToken(token.replace("Bearer ", ""));
+            User user = userService.findByEmail(email);
+
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "User not found"));
+            }
+
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("user", user);
+            response.put("joinedDate", user.getCreatedAt());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+    }
+
+    @PutMapping("/profile/update")
+    public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String token,
+                                           @RequestBody User updatedUser) {
+        try {
+            String email = jwtUtils.getUserEmailFromToken(token.replace("Bearer ", ""));
+            User user = userService.findByEmail(email);
+
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "User not found"));
+            }
+
+            user.setName(updatedUser.getName());
+
+            if (!user.getEmail().equals(updatedUser.getEmail())) {
+                if (userService.findByEmail(updatedUser.getEmail()) != null) {
+                    return ResponseEntity.badRequest()
+                            .body(Map.of("message", "Email already in use"));
+                }
+                user.setEmail(updatedUser.getEmail());
+            }
+
+            User savedUser = userService.updateUser(user);
+            return ResponseEntity.ok(savedUser);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Failed to update profile"));
+        }
+    }
+
+    @GetMapping("/health")
+    public ResponseEntity<Void> healthCheck() {
+        return ResponseEntity.ok().build();
     }
 
 }
