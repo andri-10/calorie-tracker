@@ -1,19 +1,19 @@
 package com.grupi2.calorie_tracker.dto;
 
 public class PasswordResetRequest {
-    private String email;
+    private String currentPassword;
     private String newPassword;
 
-    public String getEmail() {
-        return email;
+    public String getCurrentPassword() {
+        return currentPassword;
     }
 
     public String getNewPassword() {
         return newPassword;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setCurrentPassword(String currentPassword) {
+        this.currentPassword = currentPassword;
     }
 
     public void setNewPassword(String newPassword) {

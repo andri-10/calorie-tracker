@@ -95,7 +95,6 @@ export const setToken = (token) => {
     expiresIn: 86400000, // 24 hours
   };
   localStorage.setItem('jwtToken', JSON.stringify(tokenData));
-  // Start checking servers when token is set
   setupTokenCleanup();
 };
 

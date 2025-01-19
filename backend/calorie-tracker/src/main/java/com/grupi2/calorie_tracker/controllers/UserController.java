@@ -113,45 +113,6 @@ public class UserController {
         }
     }
 
-    @PostMapping("/update-password")
-    public ResponseEntity<?> updatePassword(@RequestBody PasswordResetRequest request) {
-        try {
-
-            if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
-                return ResponseEntity.badRequest()
-                        .body(Map.of("message", "Email is required"));
-            }
-
-            if (request.getNewPassword() == null || request.getNewPassword().trim().isEmpty()) {
-                return ResponseEntity.badRequest()
-                        .body(Map.of("message", "New password is required"));
-            }
-
-
-            String passwordPattern = "^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?\":{}|<>])[A-Za-z\\d!@#$%^&*(),.?\":{}|<>]{8,}$";
-            if (!request.getNewPassword().matches(passwordPattern)) {
-                return ResponseEntity.badRequest()
-                        .body(Map.of("message", "Your password should have at least 8 letters, 1 capital letter, and 1 special character"));
-            }
-
-
-            userService.updatePassword(request.getEmail(), request.getNewPassword());
-
-            return ResponseEntity.ok()
-                    .body(Map.of("message", "Password updated successfully"));
-
-        } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "User not found"));
-
-        } catch (Exception e) {
-            logger.error("Error updating password for user: " + request.getEmail(), e);
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "An error occurred while updating the password"));
-        }
-    }
-
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile(@RequestHeader("Authorization") String token) {
         try {
@@ -202,6 +163,39 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "Failed to update profile"));
+        }
+    }
+
+    @PostMapping("/password/reset")
+    public ResponseEntity<?> resetPassword(@RequestHeader("Authorization") String token,
+                                           @RequestBody PasswordResetRequest request) {
+        try {
+            String email = jwtUtils.getUserEmailFromToken(token.replace("Bearer ", ""));
+            User user = userService.findByEmail(email);
+
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "User not found"));
+            }
+
+            if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("message", "Current password is incorrect"));
+            }
+
+            String passwordRegex = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).*$";
+            if (!request.getNewPassword().matches(passwordRegex)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("message", "Password must contain at least one uppercase letter, one number, and one special character"));
+            }
+
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            userService.updateUser(user);
+
+            return ResponseEntity.ok(Map.of("message", "Password updated successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Failed to reset password"));
         }
     }
 
