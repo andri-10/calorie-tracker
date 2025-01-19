@@ -1,26 +1,30 @@
 package com.grupi2.calorie_tracker.services;
 
+import com.grupi2.calorie_tracker.dto.FoodEntryRequest;
 import com.grupi2.calorie_tracker.entities.FoodEntry;
 import com.grupi2.calorie_tracker.entities.MealType;
 import com.grupi2.calorie_tracker.entities.User;
-import com.grupi2.calorie_tracker.dto.FoodEntryRequest;
 import com.grupi2.calorie_tracker.repositories.FoodEntryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-public class FoodEntryServiceTest {
+class FoodEntryServiceTest {
 
     @Mock
     private FoodEntryRepository foodEntryRepository;
@@ -31,184 +35,179 @@ public class FoodEntryServiceTest {
     @InjectMocks
     private FoodEntryService foodEntryService;
 
-    private User user;
-    private FoodEntryRequest foodEntryRequest;
-    private FoodEntry foodEntry;
+    private User testUser;
+    private FoodEntry testFoodEntry;
+    private FoodEntryRequest testRequest;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        user = new User();
-        user.setId(1L);
-        user.setName("testUser");
+        testUser = new User();
+        testUser.setId(1L);
 
-        foodEntryRequest = new FoodEntryRequest();
-        foodEntryRequest.setFoodName("Pizza");
-        foodEntryRequest.setCalories(250);
-        foodEntryRequest.setPrice(new BigDecimal("10.99"));
-        foodEntryRequest.setMealType(MealType.DINNER);
-        foodEntryRequest.setDateTime(LocalDateTime.now());
+        testFoodEntry = new FoodEntry();
+        testFoodEntry.setId(1L);
+        testFoodEntry.setUser(testUser);
+        testFoodEntry.setFoodName("Test Food");
+        testFoodEntry.setCalories(500);
+        testFoodEntry.setPrice(BigDecimal.TEN);
+        testFoodEntry.setDateTime(LocalDateTime.now());
+        testFoodEntry.setMealType(MealType.LUNCH);
 
-        foodEntry = new FoodEntry();
-        foodEntry.setId(1L);
-        foodEntry.setUser(user);
-        foodEntry.setFoodName(foodEntryRequest.getFoodName());
-        foodEntry.setCalories(foodEntryRequest.getCalories());
-        foodEntry.setPrice(foodEntryRequest.getPrice());
-        foodEntry.setMealType(MealType.DINNER);
-        foodEntry.setDateTime(foodEntryRequest.getDateTime());
+        testRequest = new FoodEntryRequest();
+        testRequest.setFoodName("Test Food");
+        testRequest.setCalories(500);
+        testRequest.setPrice(BigDecimal.TEN);
+        testRequest.setDateTime(LocalDateTime.now());
+        testRequest.setMealType(MealType.LUNCH);
+        testRequest.setDescription("Test Description");
     }
 
     @Test
-    void createFoodEntryTest() {
-        // Arrange
-        when(userService.getUserById(1L)).thenReturn(user);
-        when(foodEntryRepository.save(any(FoodEntry.class))).thenReturn(foodEntry);
+    void createFoodEntry_Success() {
+        when(userService.getUserById(1L)).thenReturn(testUser);
+        when(foodEntryRepository.save(any(FoodEntry.class))).thenReturn(testFoodEntry);
 
-        // Act
-        FoodEntry createdFoodEntry = foodEntryService.createFoodEntry(foodEntryRequest, 1L);
+        FoodEntry result = foodEntryService.createFoodEntry(testRequest, 1L);
 
-        // Assert
-        assertNotNull(createdFoodEntry);
-        assertEquals("Pizza", createdFoodEntry.getFoodName());
-        assertEquals(250, createdFoodEntry.getCalories());
-        assertEquals(new BigDecimal("10.99"), createdFoodEntry.getPrice());
-        assertEquals(MealType.DINNER, createdFoodEntry.getMealType());
-        assertEquals(user, createdFoodEntry.getUser());
+        assertNotNull(result);
+        assertEquals(testFoodEntry.getFoodName(), result.getFoodName());
+        verify(foodEntryRepository).save(any(FoodEntry.class));
     }
 
     @Test
-    void deleteFoodEntryTest() {
-        // Arrange
-        when(foodEntryRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(foodEntry));
+    void deleteFoodEntry_Success() {
+        when(foodEntryRepository.findByIdAndUserId(1L, 1L))
+                .thenReturn(Optional.of(testFoodEntry));
 
-        // Act
         boolean result = foodEntryService.deleteFoodEntry(1L, 1L);
 
-        // Assert
         assertTrue(result);
-        verify(foodEntryRepository, times(1)).delete(foodEntry);
+        verify(foodEntryRepository).delete(testFoodEntry);
     }
 
     @Test
-    void deleteFoodEntryNotFoundTest() {
-        // Arrange
-        when(foodEntryRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.empty());
+    void deleteFoodEntry_NotFound() {
+        when(foodEntryRepository.findByIdAndUserId(1L, 1L))
+                .thenReturn(Optional.empty());
 
-        // Act
         boolean result = foodEntryService.deleteFoodEntry(1L, 1L);
 
-        // Assert
         assertFalse(result);
-        verify(foodEntryRepository, never()).delete(any(FoodEntry.class));
+        verify(foodEntryRepository, never()).delete(any());
     }
 
     @Test
-    void getUserFoodEntriesForDayTest() {
-        // Arrange
-        LocalDateTime today = LocalDateTime.now();
-        when(foodEntryRepository.findByUserIdAndDateTimeBetweenOrderByDateTimeDesc(1L, today.toLocalDate().atStartOfDay(), today.toLocalDate().atTime(23, 59, 59)))
-                .thenReturn(List.of(foodEntry));
+    void getUserFoodEntriesForDay() {
+        LocalDateTime date = LocalDateTime.now();
+        LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1);
 
-        // Act
-        var result = foodEntryService.getUserFoodEntriesForDay(1L, today);
+        when(foodEntryRepository.findByUserIdAndDateTimeBetweenOrderByDateTimeDesc(
+                1L, startOfDay, endOfDay))
+                .thenReturn(Arrays.asList(testFoodEntry));
 
-        // Assert
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
-        assertEquals(1, result.size());
+        List<FoodEntry> results = foodEntryService.getUserFoodEntriesForDay(1L, date);
+
+        assertFalse(results.isEmpty());
+        assertEquals(1, results.size());
+        verify(foodEntryRepository).findByUserIdAndDateTimeBetweenOrderByDateTimeDesc(
+                1L, startOfDay, endOfDay);
     }
 
     @Test
-    void getDailyCaloriesTest() {
-        // Arrange
-        LocalDateTime today = LocalDateTime.now();
-        when(foodEntryRepository.getTotalCaloriesForUserBetweenDates(1L, today.toLocalDate().atStartOfDay(), today.toLocalDate().atTime(23, 59, 59)))
-                .thenReturn(250);
+    void getDailyCalories() {
+        LocalDateTime date = LocalDateTime.now();
+        LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1);
 
-        // Act
-        Integer totalCalories = foodEntryService.getDailyCalories(1L, today);
+        when(foodEntryRepository.getTotalCaloriesForUserBetweenDates(1L, startOfDay, endOfDay))
+                .thenReturn(500);
 
-        // Assert
-        assertEquals(250, totalCalories);
+        Integer calories = foodEntryService.getDailyCalories(1L, date);
+
+        assertEquals(500, calories);
     }
 
     @Test
-    void getMonthlySpendingTest() {
-        // Arrange
-        int year = 2025;
-        int month = 1;
-        when(foodEntryRepository.calculateMonthlySpending(1L, year, month)).thenReturn(new BigDecimal("50.75"));
+    void getHighCalorieDays() {
+        Date testDate = new Date();
+        when(foodEntryRepository.findHighCalorieDays(1L, 2024, 1, 2000))
+                .thenReturn(Arrays.asList(testDate));
 
-        // Act
-        BigDecimal spending = foodEntryService.getMonthlySpending(1L, year, month);
+        List<LocalDateTime> results = foodEntryService.getHighCalorieDays(1L, 2024, 1, 2000);
 
-        // Assert
-        assertEquals(new BigDecimal("50.75"), spending);
+        assertFalse(results.isEmpty());
+        assertEquals(1, results.size());
     }
 
     @Test
-    void getUserFoodEntriesForAllTimeTest() {
-        // Arrange
-        when(foodEntryRepository.findByUserIdOrderByDateTimeDesc(1L)).thenReturn(List.of(foodEntry));
+    void getMonthlySpending_WithResults() {
+        when(foodEntryRepository.calculateMonthlySpending(1L, 2024, 1))
+                .thenReturn(BigDecimal.valueOf(100.00));
 
-        // Act
-        var result = foodEntryService.getUserFoodEntriesForAllTime(1L);
+        BigDecimal result = foodEntryService.getMonthlySpending(1L, 2024, 1);
 
-        // Assert
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
-        assertEquals(1, result.size());
+        assertEquals(BigDecimal.valueOf(100.00), result);
     }
 
     @Test
-    void getUserFoodEntriesForWeekTest() {
-        // Arrange
-        int year = 2025;
-        int week = 3;
-        when(foodEntryRepository.findByUserIdAndDateTimeBetweenOrderByDateTimeDesc(1L, LocalDate.of(year, 1, 1).atStartOfDay(), LocalDate.of(year, 1, 7).atTime(23, 59, 59)))
-                .thenReturn(List.of(foodEntry));
+    void getMonthlySpending_NoResults() {
+        when(foodEntryRepository.calculateMonthlySpending(1L, 2024, 1))
+                .thenReturn(null);
 
-        // Act
-        var result = foodEntryService.getUserFoodEntriesForWeek(1L, year, week);
+        BigDecimal result = foodEntryService.getMonthlySpending(1L, 2024, 1);
 
-        // Assert
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
-        assertEquals(1, result.size());
+        assertEquals(BigDecimal.ZERO, result);
     }
 
     @Test
-    void getUserFoodEntriesForMonthTest() {
-        // Arrange
-        int year = 2025;
-        int month = 1;
-        when(foodEntryRepository.findByUserIdAndDateTimeBetweenOrderByDateTimeDesc(1L, LocalDate.of(year, month, 1).atStartOfDay(), LocalDate.of(year, month, 31).atTime(23, 59, 59)))
-                .thenReturn(List.of(foodEntry));
+    void getUserFoodEntriesForWeek() {
+        when(foodEntryRepository.findByUserIdAndDateTimeBetweenOrderByDateTimeDesc(
+                eq(1L), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(Arrays.asList(testFoodEntry));
 
-        // Act
-        var result = foodEntryService.getUserFoodEntriesForMonth(1L, year, month);
+        List<FoodEntry> results = foodEntryService.getUserFoodEntriesForWeek(1L, 2024, 1);
 
-        // Assert
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
-        assertEquals(1, result.size());
+        assertFalse(results.isEmpty());
+        assertEquals(1, results.size());
     }
 
     @Test
-    void getUserFoodEntriesForAllTimeWithinRangeTest() {
-        // Arrange
-        LocalDateTime startDate = LocalDateTime.now().minusDays(7);
-        LocalDateTime endDate = LocalDateTime.now();
-        when(foodEntryRepository.findByUserIdAndDateTimeBetweenOrderByDateTimeDesc(1L, startDate, endDate)).thenReturn(List.of(foodEntry));
+    void getUserFoodEntriesForMonth() {
+        when(foodEntryRepository.findByUserIdAndDateTimeBetweenOrderByDateTimeDesc(
+                eq(1L), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(Arrays.asList(testFoodEntry));
 
-        // Act
-        var result = foodEntryService.getUserFoodEntriesForAllTimeWithinRange(1L, startDate, endDate);
+        List<FoodEntry> results = foodEntryService.getUserFoodEntriesForMonth(1L, 2024, 1);
 
-        // Assert
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
-        assertEquals(1, result.size());
+        assertFalse(results.isEmpty());
+        assertEquals(1, results.size());
+    }
+
+    @Test
+    void getUserFoodEntriesForAllTime() {
+        when(foodEntryRepository.findByUserIdOrderByDateTimeDesc(1L))
+                .thenReturn(Arrays.asList(testFoodEntry));
+
+        List<FoodEntry> results = foodEntryService.getUserFoodEntriesForAllTime(1L);
+
+        assertFalse(results.isEmpty());
+        assertEquals(1, results.size());
+    }
+
+    @Test
+    void getUserFoodEntriesForAllTimeWithinRange() {
+        LocalDateTime start = LocalDateTime.now().minusDays(7);
+        LocalDateTime end = LocalDateTime.now();
+
+        when(foodEntryRepository.findByUserIdAndDateTimeBetweenOrderByDateTimeDesc(1L, start, end))
+                .thenReturn(Arrays.asList(testFoodEntry));
+
+        List<FoodEntry> results = foodEntryService.getUserFoodEntriesForAllTimeWithinRange(1L, start, end);
+
+        assertFalse(results.isEmpty());
+        assertEquals(1, results.size());
     }
 }

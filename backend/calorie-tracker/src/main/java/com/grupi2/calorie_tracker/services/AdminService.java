@@ -63,7 +63,7 @@ public class AdminService {
 
     }
 
-    private List<UserOverBudgetDTO> getUsersOverBudget() {
+    List<UserOverBudgetDTO> getUsersOverBudget() {
         // Define the budget limit, e.g., 1000
         BigDecimal budgetLimit = new BigDecimal("1000");
 

@@ -22,7 +22,7 @@ public class EmailService {
             System.out.println("Email sent successfully to: " + to);
         } catch (Exception e) {
             System.out.println("Failed to send email to: " + to + ", Error: " + e.getMessage());
-            e.printStackTrace(); // If you want to print stack trace to console as well
+            e.printStackTrace();
         }
     }
 }
