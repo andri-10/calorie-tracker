@@ -16,30 +16,24 @@ const LandingPage = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Mark that we're on landing page
     markNavigatingToLandingPage();
-    
-    // Initialize token cleanup
+
     setupTokenCleanup();
 
-    // Function to check auth status
     const checkAuth = () => {
       const token = getToken();
       setIsLoggedIn(!!token);
       setIsLoading(false);
     };
 
-    // Initial check
     checkAuth();
 
-    // Clean up when component unmounts
     return () => {
       resetNavigatingFlag();
     };
   }, []); 
 
   const handleNavigation = (path) => {
-    // Reset the navigating flag before navigation
     resetNavigatingFlag();
     navigate(path);
   };

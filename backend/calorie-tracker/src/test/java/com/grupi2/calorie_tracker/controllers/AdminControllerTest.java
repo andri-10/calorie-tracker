@@ -41,13 +41,11 @@ class AdminControllerTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        // Initialize test user
         testUser = new User();
         testUser.setId(1L);
         testUser.setName("Test User");
         testUser.setEmail("test@example.com");
 
-        // Initialize test food entry
         testFoodEntry = new FoodEntry();
         testFoodEntry.setId(1L);
         testFoodEntry.setUser(testUser);
@@ -57,7 +55,6 @@ class AdminControllerTest {
         testFoodEntry.setDateTime(LocalDateTime.now());
         testFoodEntry.setMealType(MealType.LUNCH);
 
-        // Initialize test food entry request
         testFoodEntryRequest = new FoodEntryRequest();
         testFoodEntryRequest.setFoodName("Test Food");
         testFoodEntryRequest.setCalories(500);

@@ -321,7 +321,7 @@ const AdminDashboard = () => {
         </div>
         <div className="modal-body">
           <h6>Average calories for this user last week: {userAverageCalories.toFixed(2)} kcal</h6>
-          <h6>Joined on: {userJoinDate ? new Date(userJoinDate).toLocaleDateString() : 'N/A'}</h6> {/* Display Join Date */}
+          <h6>Joined on: {userJoinDate ? new Date(userJoinDate).toLocaleDateString() : 'N/A'}</h6> 
           <table className="table table-striped" id="modalTable">
             <thead>
               <tr>

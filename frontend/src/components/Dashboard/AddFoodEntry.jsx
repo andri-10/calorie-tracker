@@ -106,7 +106,6 @@ const AddFoodEntry = () => {
                 )}
 
                 <form onSubmit={handleSubmit}>
-                  {/* Rest of the form remains the same */}
                   <div className="mb-3">
                     <label className="form-label fw-medium">Food Name</label>
                     <input

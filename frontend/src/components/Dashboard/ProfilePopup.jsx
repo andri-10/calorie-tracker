@@ -73,7 +73,7 @@ const ProfilePopup = ({ show, onHide }) => {
       
       const userToUpdate = {
         name: editedUser.name,
-        email: user.email  // Include current email since backend expects it
+        email: user.email
       };
   
       const response = await fetch('http://localhost:8080/users/profile/update', {
@@ -115,7 +115,7 @@ const ProfilePopup = ({ show, onHide }) => {
   const handlePasswordReset = async () => {
     setPasswordError('');
     
-    // Validate inputs
+
     if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
       setPasswordError('All password fields are required');
       return;
@@ -150,7 +150,6 @@ const ProfilePopup = ({ show, onHide }) => {
         throw new Error(errorData.message || 'Failed to reset password');
       }
 
-      // Clear password fields and show success
       setPasswordData({
         currentPassword: '',
         newPassword: '',
@@ -166,7 +165,7 @@ const ProfilePopup = ({ show, onHide }) => {
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString(); // Formats as MM/DD/YYYY
+    return date.toLocaleDateString();
   };
 
   return (
@@ -193,8 +192,8 @@ const ProfilePopup = ({ show, onHide }) => {
               <Form.Control
                 type="email"
                 value={user.email}
-                disabled={true}  // Always disabled
-                readOnly        // Added for extra clarity
+                disabled={true}  
+                readOnly        
                 placeholder="Your email"
               />
             </Form.Group>

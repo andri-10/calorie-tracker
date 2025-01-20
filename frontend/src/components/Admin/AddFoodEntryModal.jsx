@@ -18,7 +18,7 @@ const AddFoodEntryModal = ({ userId, onClose, onSuccess }) => {
     setError('');
 
     try {
-      const token = getToken();  // Get the token using the getToken function
+      const token = getToken();
 
       if (!token) {
         setError('Authorization token not found. Please log in again.');
@@ -29,7 +29,7 @@ const AddFoodEntryModal = ({ userId, onClose, onSuccess }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,  // Use the retrieved token
+          'Authorization': `Bearer ${token}`, 
         },
         body: JSON.stringify({
           ...foodEntry,

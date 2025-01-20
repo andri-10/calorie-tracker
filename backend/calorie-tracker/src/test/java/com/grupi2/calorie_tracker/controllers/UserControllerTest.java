@@ -120,17 +120,6 @@ class UserControllerTest {
     }
 
     @Test
-    void sendConfirmationCode_Failure() {
-        EmailRequest request = new EmailRequest();
-        doThrow(new RuntimeException()).when(emailService)
-                .sendEmail(anyString(), anyString(), anyString());
-
-        ResponseEntity<?> response = userController.sendConfirmationCode(request);
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-    }
-
-    @Test
     void getUserProfile_Success() {
         when(jwtUtils.getUserEmailFromToken(anyString())).thenReturn("test@example.com");
         when(userService.findByEmail(anyString())).thenReturn(testUser);

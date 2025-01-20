@@ -54,8 +54,6 @@ public interface FoodEntryRepository extends JpaRepository<FoodEntry, Long> {
 
     int countByDateTimeBetween(LocalDateTime start, LocalDateTime end);
 
-    //@Query("SELECT AVG(f.calories) FROM FoodEntry f WHERE f.dateTime >= :startDate GROUP BY f.user")
-    //double getAverageCaloriesPerUserLastWeek(@Param("startDate") LocalDateTime startDate);
 
     @Query("SELECT AVG(f.calories) FROM FoodEntry f WHERE f.dateTime >= :startDate")
     double getAverageCaloriesLastWeek(@Param("startDate") LocalDateTime startDate);

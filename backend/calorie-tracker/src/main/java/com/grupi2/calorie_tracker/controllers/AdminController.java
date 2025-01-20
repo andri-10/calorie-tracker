@@ -2,14 +2,12 @@ package com.grupi2.calorie_tracker.controllers;
 
 import com.grupi2.calorie_tracker.dto.AdminStatsResponse;
 import com.grupi2.calorie_tracker.dto.FoodEntryRequest;
-import com.grupi2.calorie_tracker.dto.UserOverBudgetDTO;
 import com.grupi2.calorie_tracker.entities.FoodEntry;
 import com.grupi2.calorie_tracker.entities.User;
 import com.grupi2.calorie_tracker.services.AdminService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

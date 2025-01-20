@@ -64,10 +64,8 @@ public class AdminService {
     }
 
     List<UserOverBudgetDTO> getUsersOverBudget() {
-        // Define the budget limit, e.g., 1000
         BigDecimal budgetLimit = new BigDecimal("1000");
 
-        // Get the current month and year
         LocalDateTime now = LocalDateTime.now();
         int currentYear = now.getYear();
         int currentMonth = now.getMonthValue();
@@ -75,7 +73,6 @@ public class AdminService {
         // Fetch all users
         List<User> allUsers = getAllUsers();
 
-        // Map the users to a list of UserOverBudgetDTOs, including monthly spending calculation
         return allUsers.stream()
                 .map(user -> {
                     BigDecimal monthlySpending = foodEntryRepository.calculateMonthlySpending(user.getId(), currentYear, currentMonth);

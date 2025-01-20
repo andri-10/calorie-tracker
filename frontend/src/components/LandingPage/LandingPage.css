@@ -1,33 +1,174 @@
-.landing-container {
-  position: relative;
-  height: 100vh;
-  background-size: 100%;
-
-  background-repeat: no-repeat;
-  animation: backgroundZoom 3s ease-in-out forwards;
+body {
+  margin: 0;
+  padding: 0;
 }
 
-
-@keyframes backgroundZoom {
-  0% {
-    background-size: 120%;
-    background-position: calc(50% - 50px) center;
+/* Tablet Styles (768px to 1024px) */
+@media (max-width: 1024px) {
+  .landing-container {
+    min-height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
   }
-  100% {
-    background-size: 110%;
-    background-position: calc(50% - 30px) center;
+
+  .landing-content {
+    padding-top: 2vh;
+  }
+
+  .content-wrapper {
+    max-width: 600px;
+  }
+
+  .title {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .description {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .logo {
+    width: 280px;
+  }
+
+  .logo-container {
+    margin-bottom: 1.5rem;
+  }
+
+  .heart-animation {
+    width: 160px;
   }
 }
 
-.fade-in-animation {
-  animation: fadeIn 2s ease-in-out forwards;
+/* Mobile Styles (below 768px) */
+@media (max-width: 768px) {
+  .landing-container {
+    overflow: hidden;
+  }
+
+  .landing-content {
+    padding-top: 1.5vh;
+  }
+
+  .content-wrapper {
+    padding: 0 0.5rem;
+  }
+
+  .logo {
+    width: 220px;
+  }
+
+  .logo-container {
+    margin-bottom: 1rem;
+  }
+
+  .title {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .description {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .buttons-container {
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .login-btn, 
+  .register-btn,
+  .dashboard-btn {
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto;
+    padding: 0.6rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .heart-animation {
+    width: 140px;
+  }
+
+  .landing-footer {
+    padding: 0.5rem;
+  }
 }
 
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
+/* Small Mobile Styles (below 480px) */
+@media (max-width: 480px) {
+  .landing-content {
+    padding-top: 1vh;
   }
-  100% {
-    opacity: 1;
+
+  .logo {
+    width: 180px;
+  }
+
+  .logo-container {
+    margin-bottom: 0.75rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .description {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .heart-animation {
+    width: 120px;
+  }
+
+  .buttons-container {
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .landing-footer {
+    padding: 0.25rem;
+  }
+}
+
+/* Handle very short heights */
+@media (max-height: 600px) {
+  .logo {
+    width: 160px;
+  }
+
+  .logo-container {
+    margin-bottom: 0.5rem;
+  }
+
+  .heart-animation {
+    width: 100px;
+  }
+
+  .title {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .description {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .buttons-container {
+    gap: 0.4rem;
+  }
+
+  .login-btn, 
+  .register-btn,
+  .dashboard-btn {
+    padding: 0.4rem 1rem;
+    font-size: 0.9rem;
   }
 }

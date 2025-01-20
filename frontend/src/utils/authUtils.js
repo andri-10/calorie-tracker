@@ -6,13 +6,13 @@ export const setupTokenCleanup = () => {
   window.addEventListener('beforeunload', handleBeforeUnload);
   startServerCheck();
 
-  // Check immediately when setting up
+  
   checkServerStatus();
 };
 
 const checkServerStatus = async () => {
   try {
-    // Check backend health
+
     const backendResponse = await fetch('http://localhost:8080/users/health', {
       method: 'HEAD',
       timeout: 5000 // 5 second timeout
@@ -23,7 +23,7 @@ const checkServerStatus = async () => {
       return;
     }
 
-    // Check frontend by attempting to access the root
+
     const frontendResponse = await fetch('http://localhost:3000', {
       method: 'HEAD',
       timeout: 5000
@@ -36,7 +36,7 @@ const checkServerStatus = async () => {
 
     lastSuccessfulCheck = Date.now();
   } catch (error) {
-    // If either check fails, handle server down
+
     handleServerDown(error.message);
   }
 };
@@ -46,7 +46,7 @@ const startServerCheck = () => {
     clearInterval(serverCheckInterval);
   }
 
-  // Check every 5 seconds
+
   serverCheckInterval = setInterval(checkServerStatus, 5000);
 };
 
@@ -54,7 +54,7 @@ const handleServerDown = (reason) => {
   console.log('Server down detected:', reason);
   const timeSinceLastCheck = Date.now() - lastSuccessfulCheck;
   
-  // If it's been more than 10 seconds since last successful check
+
   if (timeSinceLastCheck > 10000) {
     clearToken();
     if (window.location.pathname !== '/login') {
@@ -120,16 +120,16 @@ export const getToken = () => {
 
 export const clearToken = () => {
   localStorage.removeItem('jwtToken');
-  // Clear the interval when token is cleared
+
   if (serverCheckInterval) {
     clearInterval(serverCheckInterval);
   }
 };
 
-// Detect refresh
+
 window.addEventListener('load', () => {
   sessionStorage.setItem('isPageRefresh', 'true');
-  // Check if there's a token and start monitoring if there is
+
   const token = localStorage.getItem('jwtToken');
   if (token) {
     setupTokenCleanup();

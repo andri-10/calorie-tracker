@@ -180,8 +180,6 @@ body {
 }
 
 
-
-
 @keyframes slide-down {
   from {
     transform: translateY(-50px);
@@ -239,5 +237,33 @@ body {
     background-color: #E3F2FD;
     padding: 1rem;
     border-radius: 0 0 8px 8px;
+  }
+}
+
+
+@media (max-width: 991px) {
+  .nav-link {
+    padding: 0.5rem 1rem;
+    text-align: left;
+  }
+
+  .nav-link::after {
+    left: 0;
+    transform: none;
+  }
+
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    width: 15%;
+  }
+
+  .navbar-collapse {
+    background-color: #E3F2FD;
+    padding: 0.5rem;
+    border-radius: 0 0 8px 8px;
+  }
+
+  .nav-item {
+    margin: 0.25rem 0;
   }
 }

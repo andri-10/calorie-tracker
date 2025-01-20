@@ -41,7 +41,7 @@ const Login = () => {
       
       if (response.status === 200) {
         const { token } = response.data;
-        setToken(token); // Use the new setToken function
+        setToken(token); 
         
         const decoded = jwtDecode(token);
         

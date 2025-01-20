@@ -19,7 +19,7 @@ const FoodList = ({ updateStatsAfterDeletion }) => {
         }
 
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Set to midnight
+        today.setHours(0, 0, 0, 0);
 
         const timezoneOffset = today.getTimezoneOffset();
         today.setMinutes(today.getMinutes() - timezoneOffset);
@@ -161,7 +161,7 @@ const FoodList = ({ updateStatsAfterDeletion }) => {
                       <button
                         className="btn btn-outline-danger btn-sm"
                         onClick={(e) => {
-                          e.stopPropagation(); // Prevent row toggle
+                          e.stopPropagation(); 
                           deleteFoodEntry(entry.id, entry.calories, entry.price);
                         }}
                       >

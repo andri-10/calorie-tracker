@@ -13,8 +13,8 @@ body {
   padding: 20px;
   animation: showUp 0.6s ease-out;
   margin: 0;
-  width: 100%; /* Ensure the container takes full width */
-  box-sizing: border-box; /* Prevent overflow */
+  width: 100%; 
+  box-sizing: border-box;
 }
 
 .login-message {
@@ -44,8 +44,8 @@ body {
   max-width: 400px;
   transform: scale(1);
   transition: transform 0.2s ease, box-shadow 0.3s ease;
-  margin: 0; /* Ensure there's no margin to shift the card */
-  box-sizing: border-box; /* Avoid overflow issues */
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .login-card:hover {
@@ -142,11 +142,11 @@ body {
 
 @keyframes showUp {
   0% {
-    opacity: 0;  /* Start with full transparency */
-    transform: translateY(20px);  /* Start below the normal position */
+    opacity: 0; 
+    transform: translateY(20px); 
   }
   100% {
-    opacity: 1;  /* Fully visible */
-    transform: translateY(0);  /* Move to normal position */
+    opacity: 1; 
+    transform: translateY(0); 
   }
 }
