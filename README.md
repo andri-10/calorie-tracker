@@ -129,10 +129,4 @@ andri-10-calorie-tracker/
      ```
    - Use XAMPP/Docker to host the MySQL server.
 
-**Group Members.**
-1.  Andri Halili
-2.  Martin Çaro
-3.  Vamarildo Kola
-4.  Igli Çerpja
-
 Thank You
